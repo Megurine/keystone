@@ -234,6 +234,9 @@ A deck names its guide in `deck.json` (`"style": "<id>"`). Keystone has one guid
 the left edge with the logo and the chapter name, white sentence-case titles on a near-black ground. To add a guide,
 copy `library/styles/rail/`, change its rules and give it a stylesheet.
 
+<p align="center"><img src="docs/style-rail.webp" width="80%" alt="The Rail style's example slide: rail, title, lead, list markers, typefaces, sizes and the ten colour tokens"></p>
+<p align="center"><sub>The example slide of the Rail style (<code>library/slides/style-rail</code>): its rules and values on one slide.</sub></p>
+
 **Your brand: `decks/public/`.** Keystone ships a neutral brand (the Keystone K). A file in `decks/public/` replaces
 the file with the same path in `public/`, in the presenter and in published talks, so your decks carry your brand
 while the repository stays untouched:
