@@ -1,0 +1,11 @@
+{
+  "blocks": {
+    "Who am I?": "Qui suis-je&nbsp;?",
+    "One short sentence about you.": "Une phrase de présentation, courte.",
+    "Background": "Parcours",
+    "First step of the path": "Premier point du parcours",
+    "Second step of the path": "Deuxième point du parcours",
+    "Third step of the path": "Troisième point du parcours"
+  },
+  "attrs": {}
+}

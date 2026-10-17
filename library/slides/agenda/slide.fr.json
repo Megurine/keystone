@@ -1,0 +1,12 @@
+{
+  "blocks": {
+    "Contents": "Sommaire",
+    "First chapter <em>(detail)</em>": "Premier chapitre <em>(précision)</em>",
+    "What the chapter covers · in a few words · separated by dots": "Ce que le chapitre couvre · en quelques mots · séparés par des points",
+    "Second chapter": "Deuxième chapitre",
+    "Third chapter": "Troisième chapitre",
+    "One line of content at most": "Une ligne de contenu au plus",
+    "Fourth chapter <em>(detail)</em>": "Quatrième chapitre <em>(précision)</em>"
+  },
+  "attrs": {}
+}

@@ -1,0 +1,14 @@
+{
+  "blocks": {
+    "Further reading": "Pour aller plus loin",
+    "<b>01</b>First chapter": "<b>01</b>Premier chapitre",
+    "Reference title": "Titre de la référence",
+    "Author · publisher or event": "Auteur · éditeur ou événement",
+    "example.com/path": "example.com/chemin",
+    "Another reference <em>(detail)</em>": "Une autre référence <em>(précision)</em>",
+    "Author · documentation": "Auteur · documentation",
+    "<b>02</b>Second chapter": "<b>02</b>Deuxième chapitre",
+    "Author · GDC 2015": "Auteur · GDC 2015"
+  },
+  "attrs": {}
+}

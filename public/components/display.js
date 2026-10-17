@@ -7,8 +7,9 @@
 //   saCanvas2d(el, w, h, redraw?, units = 1) — 2D canvas shown at w×h slide px, backing store in screen pixels; the
 //     returned context draws in slide px × units (units 2: code written for a fixed 2× canvas keeps its coordinates).
 //     On "sa:resize" the backing store is resized, then redraw(ctx). Modules: canvas2d() in /public/components/canvas.js.
-//   saT(fr, en) — a string written by code, in the page's language (<html lang>): saT("Rouge", "Red"),
-//     n.toLocaleString(saT("fr-FR", "en-US")). Text in the markup is translated by slide.en.json instead.
+//   saT({ en: "Red", fr: "Rouge" }) — a string written by code, in the page's language (<html lang>); a language that
+//     is missing gets the first one. Numbers: n.toLocaleString(document.documentElement.lang). saT("Rouge", "Red")
+//     (French, English) is the older form. Text in the markup is translated by slide.<lang>.json instead.
 //   <a href="deck:<id>#<n>"> — a link to slide n of another deck (see below).
 (() => {
   const scale = () => {
@@ -21,7 +22,10 @@
     const r = saPixelRatio();
     if (Math.abs(r - last) > 0.01) { last = r; dispatchEvent(new Event("sa:resize")); }
   });
-  window.saT = (fr, en) => (document.documentElement.lang === "en" ? en : fr);
+  window.saT = (a, b) => {
+    const lang = document.documentElement.lang;
+    return a && typeof a === "object" ? a[lang] ?? Object.values(a)[0] : lang === "en" ? b : a;
+  };
   window.saCanvas2d = (el, w, h, redraw, units = 1) => {
     const ctx = el.getContext("2d");
     const fit = () => {

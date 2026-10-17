@@ -1,0 +1,11 @@
+{
+  "blocks": {
+    "CHAPTER": "CHAPITRE",
+    "A three-stage pipeline": "Un pipeline en trois étapes",
+    "Data goes through a <b>fixed</b> stage, then a <span>programmable</span> one.": "Les données passent par une étape <b>fixe</b> puis une étape <span>programmable</span>.",
+    "One pass": "Une passe",
+    "data": "données",
+    "Remember: <span>red marks what you program.</span>": "À retenir&nbsp;: <span>le rouge marque ce que l'on programme.</span>"
+  },
+  "attrs": {}
+}

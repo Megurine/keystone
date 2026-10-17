@@ -42,7 +42,7 @@ Rules:
 - The presenter keeps ±2 slides loaded (WebGL context limit); the website talk needs `requires = "webgl"`.
 - Builds: `window.saNext()` / `window.saPrev()` return true while the slide takes the step itself.
 
-Example slides: `rendus` (the four looks), `materiaux` (glTF materials), `verre` (frosted glass).
+Example slides: `looks` (the four looks), `materials` (glTF materials), `glass` (frosted glass).
 
 ## Physical materials (glass, glTF extensions)
 
@@ -61,5 +61,5 @@ extension: `transmission`, `volume` (thickness, attenuation), `ior`, `dispersion
 - **Glow** — paint it on the backdrop (radial gradient), not a light.
 - Use `stage(…, { ao: false, clear: null })` with a backdrop: the AO pass tone-maps the whole image, so the painted
   ground would not match the slide colour.
-- Live tuning: a few `<input type="range">` that set material values and call `render(camera)` (see `materiaux`);
+- Live tuning: a few `<input type="range">` that set material values and call `render(camera)` (see `materials`);
   stop `keydown` on them so the arrows move the slider, not the slides.

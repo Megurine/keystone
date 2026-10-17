@@ -29,6 +29,17 @@ const LIST = path.join(ROOT, "keystone.json");
 const DECKS = path.join(ROOT, "decks");
 const OWN_LIST = path.join(DECKS, "keystone.json");
 const OVERLAY = path.join(DECKS, "public");
+// Languages. A deck's slides are written in its "lang" (deck.json; English by default) and translated into others
+// (slides/<id>/slide.<lang>.json, tools/i18n.mjs). The user's language is another setting: Claude's tasks and spoken
+// answers, the voice transcription, the language of new decks. "userLang" in decks/keystone.json, else in
+// keystone.json; English by default.
+const settings = file => { try { return JSON.parse(readFileSync(file, "utf8")); } catch { return {}; } };
+const USER_LANG = settings(OWN_LIST).userLang || settings(LIST).userLang || "en";
+const langName = code => { try { return new Intl.DisplayNames(["en"], { type: "language" }).of(code); } catch { return code; } };
+const LANG_CODE = /^[a-z]{2}$/;
+const viewLang = url => { const l = url.searchParams.get("lang"); return LANG_CODE.test(l || "") ? l : null; };   // ?lang=<code>
+// A deck's title in a language: "title" is in the deck's own language, "titles" holds the others ("titleEn": older decks)
+const titleIn = (deck, lang) => !lang || lang === (deck.lang || "en") ? deck.title : deck.titles?.[lang] || (lang === "en" && deck.titleEn) || deck.title;
 const PORT = Number(process.env.PORT) || 4321;
 const HOST = process.env.HOST || "127.0.0.1";   // e.g. a Tailscale address, to open the deck on a phone
 
@@ -75,10 +86,10 @@ const CLAUDE_CTX = 90_000;
 // length is known before it is played: `tell` gets { start, ms } when the sound starts and { end, more } when it stops
 // (the presenter's popup follows the voice).
 const PS = ["-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-Command"];
-// Windows: Claude speaks French, so only with a French voice installed (Settings › Time & language › Speech, or a
-// French language pack: "Microsoft Hortense Desktop"…). None: the browser speaks. Looked up once.
+// Windows: only with a voice of the user's language installed (Settings › Time & language › Speech, or a language
+// pack: "Microsoft Hortense Desktop" for French…). None: the browser speaks. Looked up once.
 const WIN_VOICE = !WIN ? Promise.resolve("") : new Promise(done => execFile("powershell.exe", [...PS,
-  "Add-Type -AssemblyName System.Speech; (New-Object System.Speech.Synthesis.SpeechSynthesizer).GetInstalledVoices() | Where-Object { $_.Enabled -and $_.VoiceInfo.Culture.Name -like 'fr*' } | ForEach-Object { $_.VoiceInfo.Name } | Select-Object -First 1"],
+  `Add-Type -AssemblyName System.Speech; (New-Object System.Speech.Synthesis.SpeechSynthesizer).GetInstalledVoices() | Where-Object { $_.Enabled -and $_.VoiceInfo.Culture.Name -like '${USER_LANG}*' } | ForEach-Object { $_.VoiceInfo.Name } | Select-Object -First 1`],
   { windowsHide: true }, (err, out) => done(err ? "" : String(out).trim())));
 const speaks = async () => process.platform === "darwin" || !!(await WIN_VOICE);
 const wavMs = file => {   // length of a PCM .wav: its "data" chunk / bytes per second
@@ -221,19 +232,30 @@ async function serveDeck(DECK_DIR, port) {
   const DECK_ROUTES = existsSync(path.join(DECK_DIR, "server.mjs"))
     ? (await import(pathToFileURL(path.join(DECK_DIR, "server.mjs")))).routes || {} : {};
 
-  // English version: slide.html + slides/<id>/slide.en.json (tools/i18n.mjs), rendered with ?lang=en. No translation:
-  // the French slide. en: has a translation; enOutdated: some of it no longer matches the French (edited since).
-  async function loadDeck(lang = "fr") {
-    const deck = await readJSON(DECK, { title: "Presentation", order: [] });
+  // The deck's languages: its own ("lang", English by default) first, then deck.json "languages" or else every
+  // language a slide has a translation for (slides/<id>/slide.<lang>.json).
+  async function deckLangs(deck) {
+    const source = deck.lang || "en", found = new Set(deck.languages || []);
+    if (!deck.languages) for (const id of deck.order || []) for (const f of await fs.readdir(path.join(SLIDES, id)).catch(() => [])) {
+      const m = f.match(/^slide\.([a-z]{2})\.json$/); if (m) found.add(m[1]);
+    }
+    found.delete(source);
+    return { source, languages: [source, ...[...found].sort()] };
+  }
+  // The deck seen in one of its languages (?lang=<code>; none: its own). In another language a slide is rendered from
+  // slide.html + its translation: translated = it has one; outdated = some of it no longer matches slide.html (edited since).
+  async function loadDeck(view) {
+    const deck = await readJSON(DECK, { title: "Presentation", order: [] }), { source, languages } = await deckLangs(deck);
+    const lang = languages.includes(view) ? view : source;
     const slides = await Promise.all(deck.order.map(async id => {
       const dir = path.join(SLIDES, id);
       const brief = await readJSON(path.join(dir, "brief.json"), {});
       const { checks = [] } = await readJSON(path.join(dir, "checks.json"), {});
-      const styled = existsSync(path.join(dir, "slide.html")), tr = readTranslation(dir, "en");
-      const enOutdated = !!(styled && tr && translate(await fs.readFile(path.join(dir, "slide.html"), "utf8"), tr).missing.length);
-      return { id, brief, checks, styled, en: !!tr, enOutdated, reference: existsSync(path.join(dir, "reference.png")) };
+      const styled = existsSync(path.join(dir, "slide.html")), tr = lang !== source ? readTranslation(dir, lang) : null;
+      const outdated = !!(styled && tr && translate(await fs.readFile(path.join(dir, "slide.html"), "utf8"), tr).missing.length);
+      return { id, brief, checks, styled, translated: lang === source || !!tr, outdated, reference: existsSync(path.join(dir, "reference.png")) };
     }));
-    return { title: lang === "en" && deck.titleEn || deck.title, lang, slides };
+    return { title: titleIn(deck, lang), lang, source, languages, userLang: USER_LANG, slides };
   }
 
   function slugify(s) {
@@ -245,7 +267,7 @@ async function serveDeck(DECK_DIR, port) {
   }
 
   // Every slide renders as a full 1280x720 document inside an iframe.
-  function page(id, body, extraHead = "", style = "", lang = "fr") {
+  function page(id, body, extraHead = "", style = "", lang = "en") {
     return `<!doctype html><html lang="${lang}"><head><meta charset="utf-8">
   <base href="/slides/${id}/">
   <meta name="viewport" content="width=1280">
@@ -258,13 +280,15 @@ async function serveDeck(DECK_DIR, port) {
     const id = (await readJSON(DECK, {})).style, guide = id && (await styleGuides()).find(g => g.id === id);   // read at each render: the style can change
     return guide && guide.css !== "/public/theme.css" ? `<link rel="stylesheet" href="${esc(guide.css)}">` : "";
   }
-  async function renderSlide(id, style = "", lang = "fr", was) {   // was: the slide.html to show instead of the file (null: there was none)
+  async function renderSlide(id, style = "", view = null, was) {   // was: the slide.html to show instead of the file (null: there was none)
     const head = await styleHead();
     const dir = path.join(SLIDES, id);
     const brief = await readJSON(path.join(dir, "brief.json"), {});
+    const source = (await readJSON(DECK, {})).lang || "en";
+    let lang = view || source;
     try {
-      const tr = lang === "en" ? readTranslation(dir, "en") : null;
-      if (!tr) lang = "fr";
+      const tr = lang !== source ? readTranslation(dir, lang) : null;
+      if (!tr) lang = source;   // not translated: the slide in its own language
       if (was === null) throw new Error("no slide then");
       let html = translate(was ?? await fs.readFile(path.join(dir, "slide.html"), "utf8"), tr).html;
       // Optional first line "<!-- body: sa-cover -->" adds classes to <body>
@@ -281,7 +305,7 @@ async function serveDeck(DECK_DIR, port) {
       ${ref ? `<figure class="sa-draft-ref"><img src="reference.png" alt=""><figcaption>Keynote reference</figcaption></figure>` : ""}
     </div>
     <span class="sa-draft-flag">Draft · to style</span>
-  </div>`, head, style);
+  </div>`, head, style, source);
     }
   }
 
@@ -306,8 +330,9 @@ async function serveDeck(DECK_DIR, port) {
   // (--resume), so Claude remembers what it just did; after CLAUDE_TTL with no run a new session starts.
   // No user answers its permission prompts: it may edit files and run only the commands listed below.
   const CLAUDE_FILE = path.join(FEEDBACK, "claude.json");
-  const CLAUDE_TOOLS = ["Bash(node tools/ks.mjs:*)", "Bash(node tools/asset.mjs:*)", "Bash(npm run shots:*)", "Bash(DECK_LANG=en npm run shots:*)",
-    "Bash(node tools/cdp-check.mjs:*)", "Bash(DECK_LANG=en node tools/cdp-check.mjs:*)"];
+  const CLAUDE_TOOLS = ["Bash(node tools/ks.mjs:*)", "Bash(node tools/asset.mjs:*)", "Bash(npm run shots:*)", "Bash(node tools/cdp-check.mjs:*)"];
+  const claudeTools = async () => [...CLAUDE_TOOLS, ...(await deckLangs(await readJSON(DECK, {}))).languages.slice(1)   // and in each other language of the deck
+    .flatMap(l => [`Bash(DECK_LANG=${l} npm run shots:*)`, `Bash(DECK_LANG=${l} node tools/cdp-check.mjs:*)`])];
   let claudeRunning = null, claudeWaiting = false, claudeStep = "", claudeStage = "", claudeModel = "";   // start time of the run in progress; a run is queued; what Claude does now, and which model
   const claudeState = async () => ({ auto: false, ...await readJSON(CLAUDE_FILE, {}), running: claudeRunning, queued: claudeWaiting, step: claudeStep, stage: claudeStage, model: claudeModel, slide: claudeSlide, changed: claudeChanged, log: claudeLog, diff: claudeDiffState() });
   // What Claude does now goes straight to the open pages (the presenter shows it next to its mascot)
@@ -450,6 +475,7 @@ async function serveDeck(DECK_DIR, port) {
     const st = await readJSON(CLAUDE_FILE, {});
     const resume = st.session && Date.now() - st.at < CLAUDE_TTL && st.ctx < CLAUDE_CTX, session = resume ? st.session : crypto.randomUUID();
     let ctx = 0;   // tokens the session holds: what the last request sent
+    const tools = await claudeTools();
     const run = flag => new Promise((done, fail) => {
       // The prompt goes through stdin: it holds whole slides and sessions, longer than a Windows command line (32,767 characters)
       writeFileSync(NO_MCP, '{"mcpServers":{}}');
@@ -457,7 +483,7 @@ async function serveDeck(DECK_DIR, port) {
       const child = spawn(claude.file, claude.args(["-p", flag, session, "--output-format", "stream-json", "--verbose", "--permission-mode", "acceptEdits",
         "--strict-mcp-config", "--mcp-config", NO_MCP,
         "--model", level.model, ...(level.effort ? ["--effort", level.effort] : []),   // less thinking = faster
-        "--allowedTools", ...CLAUDE_TOOLS, ...(DECK_DIR.startsWith(ROOT + path.sep) ? [] : ["--add-dir", DECK_DIR])]),
+        "--allowedTools", ...tools, ...(DECK_DIR.startsWith(ROOT + path.sep) ? [] : ["--add-dir", DECK_DIR])]),
         { cwd: ROOT, env: { ...TOOL_ENV, PORT: String(port) }, stdio: ["pipe", "pipe", "pipe"], shell: claude.shell, windowsHide: true });
       child.stdin.on("error", () => {});
       child.stdin.end(prompt);
@@ -500,17 +526,17 @@ ${pending.map(s => `
 pictures: ${s.pictures.map(rel).join(", ") || "none (no stroke)"} · slides: ${s.slides.join(", ")}
 ${s.text.trim()}`).join("\n")}
 
-Handle it as the "Feedback sessions" section of CLAUDE.md says, in as few steps as you can (use several tools in one step). A session can go over several slides (Enter lines): the user keeps talking while changing slide, and one request can be about several slides, or about the slide shown just before or just after the words. Read the whole session before you write its tasks. A Note line is a message the user typed: it counts like spoken words. The user may ask for new slides, or speak on a slide just created ("New slide", not styled yet): see "New slides" in CLAUDE.md. When you write several slides on one subject, each slide is one idea with its own title: never label them as numbered parts ("Réponse n° 1", "Partie 2", "Étape 3"). When the feedback asks to style or update a slide marked "not styled yet" or "its brief changed", do it as "Styling a slide" in CLAUDE.md says, then set "status": "done" in its brief.json.
+Handle it as the "Feedback sessions" section of CLAUDE.md says, in as few steps as you can (use several tools in one step). A session can go over several slides (Enter lines): the user keeps talking while changing slide, and one request can be about several slides, or about the slide shown just before or just after the words. Read the whole session before you write its tasks. A Note line is a message the user typed: it counts like spoken words. The user may ask for new slides, or speak on a slide just created ("New slide", not styled yet): see "New slides" in CLAUDE.md. When you write several slides on one subject, each slide is one idea with its own title: never label them as numbered parts ("Answer 1", "Part 2", "Step 3/5", in any language). Write the Task texts, the State::Ask questions and your last sentences in ${langName(USER_LANG)}, the user's language; slide text is in the deck's language. When the feedback asks to style or update a slide marked "not styled yet" or "its brief changed", do it as "Styling a slide" in CLAUDE.md says, then set "status": "done" in its brief.json.
 1. Read the pictures and the slide files you need, in one step.
-${level === FAST ? `2. You do the work yourself: text, style, layout, new slides, diagrams, 2D animations. Append the Task lines of the new sessions (every session must get one): State::Doing for what you do, State::Ask for a question, State::Done with the reason when there is nothing to do. A task marked "to do" is yours too: the user came back to it, read its Reply lines and the follow-up sessions, set it to State::Doing. Edit the slides in the same step (slide.en.json too when French text changed).
+${level === FAST ? `2. You do the work yourself: text, style, layout, new slides, diagrams, 2D animations. Append the Task lines of the new sessions (every session must get one): State::Doing for what you do, State::Ask for a question, State::Done with the reason when there is nothing to do. A task marked "to do" is yours too: the user came back to it, read its Reply lines and the follow-up sessions, set it to State::Doing. Edit the slides in the same step (and the slide's translations, slide.<lang>.json, when the text of slide.html changed).
 Two kinds of task are not for you. Leave them in State::Todo and do not start them, a stronger model takes them right after you: a task that needs 3D (three.js, WebGL, a shader, a 3D scene on a canvas), whose text must then say exactly what to do; and a task marked "the user came back to it 2 times" or more.`
-  : `2. These tasks are for you: 3D work that the fast pass left with its instructions, or a task the user came back to more than once because the result was not right (read the Reply lines and the follow-up sessions). Set them to State::Doing and do them (slide.en.json too when French text changed). State::Ask for a question. The user can follow you live: before each step, write one short sentence in French, to the user ("tu"), that says what you are going to do and why.`}
+  : `2. These tasks are for you: 3D work that the fast pass left with its instructions, or a task the user came back to more than once because the result was not right (read the Reply lines and the follow-up sessions). Set them to State::Doing and do them (and the slide's translations, slide.<lang>.json, when the text of slide.html changed). State::Ask for a question. The user can follow you live: before each step, write one short sentence in ${langName(USER_LANG)}, to the user${USER_LANG === "fr" ? ' ("tu")' : ""}, that says what you are going to do and why.`}
 3. One command: node tools/ks.mjs <the session files>. Take no screenshot for a task you do for the first time. For a task the user came back to, the user saw something wrong: after your change, run npm run shots -- <slide id>, look at the picture, and fix what is wrong before you go on. Checking every change with a picture is slow, so the user looks at the slide and comes back to you when something is not right.
 4. Set the tasks you did to State::Done. No check after that: the presenter reports a session file that is wrong.
 No user reads this conversation, the user only sees the Task lines in the presenter. Never ask a question here: write a State::Ask task. Do not commit, do not push, do not start or stop a server.
 Change files with the Read and Edit tools only. Never write a file with a shell command (printf, echo, cat >) and do not start a command with cd: no user can approve it, it is refused and costs a step. Only read-only commands, "node tools/ks.mjs", "node tools/asset.mjs", "npm run shots" and "node tools/cdp-check.mjs" run, from the Keystone root.
 An image, a video or a model of another deck or of the style library (you can read every deck's files): copy it into this deck with "node tools/asset.mjs <file> [<file> …] ${rel(DECK_DIR)}", which prints the /deck/assets/… address to write in the slide. Never point a slide at another deck's folder or server, and never ask the user to copy a file.
-End with one or two short sentences in French that say what you did. The presenter shows them and can read them aloud to the user: speak to the user ("tu"), plain words, no code, no file name, no backticks. Say what changed on the slides, nothing about how you worked: never say that you took no screenshot or did not look at the result, in these sentences or in a task's text.`;
+End with one or two short sentences in ${langName(USER_LANG)} that say what you did. The presenter shows them and can read them aloud to the user: speak to the user${USER_LANG === "fr" ? ' ("tu")' : ""}, plain words, no code, no file name, no backticks. Say what changed on the slides, nothing about how you worked: never say that you took no screenshot or did not look at the result, in these sentences or in a task's text.`;
 
   // The user interrupts Claude (the popup's Stop): its process is killed, and nothing stays to do. Every task in
   // progress or to do becomes State::Stopped, and a session not read yet gets a stopped task, so the next run does
@@ -668,19 +694,19 @@ Get ready: read ${rel(path.join(SLIDES, slide, "slide.html"))} now. Change no fi
         const style = (url.searchParams.get("style") || "").replace(/[^a-z0-9-]/g, "");
         // ?before=1: the slide as it was before Claude's changes (the review); a slide Claude did not change: as it is
         const was = url.searchParams.has("before") ? reviewBefore.get(path.join(SLIDES, m[1], "slide.html")) : undefined;
-        const html = await renderSlide(m[1], style, url.searchParams.get("lang") === "en" ? "en" : "fr", was);
+        const html = await renderSlide(m[1], style, viewLang(url), was);
         const fb = url.searchParams.get("feedback");
         return res.end(fb ? html.replace("</body>", await feedbackOverlay(fb, Number(url.searchParams.get("visit")) || 1) + "</body>") : html);
       }
       if ((m = p.match(/^\/slides\/([a-z0-9-]+)\/(.+)$/))) return serveFile(req, res, path.join(SLIDES, m[1], m[2]), SLIDES);
 
-      if (p === "/api/info" && req.method === "GET") return json(res, 200, { name: DECK_NAME, dir: DECK_DIR });
+      if (p === "/api/info" && req.method === "GET") return json(res, 200, { name: DECK_NAME, dir: DECK_DIR, userLang: USER_LANG });
       // The decks served by this process, for links between decks (each on its own port of the same host)
       if (p === "/api/decks" && req.method === "GET") {
-        const en = url.searchParams.get("lang") === "en";
+        const lang = viewLang(url);
         return json(res, 200, { current: DECK_NAME, decks: await Promise.all(served.map(async d => {
           const info = await readJSON(path.join(d.dir, "deck.json"), {});
-          return { id: d.id, title: (en && info.titleEn) || info.title || d.id, port: d.port };
+          return { id: d.id, title: titleIn(info, lang) || d.id, port: d.port };
         })) });
       }
       if (p === "/api/styles" && req.method === "GET") return json(res, 200, { styles: await styleGuides() });
@@ -699,7 +725,7 @@ Get ready: read ${rel(path.join(SLIDES, slide, "slide.html"))} now. Change no fi
         let next = Math.max(PORT, ...served.map(d => d.port), ...list.decks.map(d => d.port || 0)) + 1;
         while (!await free(next)) next++;
         await fs.mkdir(path.join(dir, "slides", "cover"), { recursive: true });
-        await writeJSON(path.join(dir, "deck.json"), { title, titleEn: "", style: style || guides.find(g => g.default)?.id || "", order: ["cover"] });
+        await writeJSON(path.join(dir, "deck.json"), { title, lang: USER_LANG, style: style || guides.find(g => g.default)?.id || "", order: ["cover"] });   // written in the user's language
         await writeJSON(path.join(dir, "slides", "cover", "brief.json"), { title, text: "", notes: "", status: "todo", updatedAt: new Date().toISOString() });
         // The media of the style guide (its cover photo…), so the deck's slides can use them from the start
         for (const file of guides.find(g => g.id === (style || guides.find(x => x.default)?.id))?.media || []) {
@@ -710,13 +736,14 @@ Get ready: read ${rel(path.join(SLIDES, slide, "slide.html"))} now. Change no fi
         }
         {   // one deck per line, as the file is written by hand
           list.decks.push({ dir: path.relative(DECKS, dir), port: next });
-          await fs.writeFile(OWN_LIST, `{\n  "decks": [\n${list.decks.map(d => `    { ${Object.entries(d).map(([k, v]) => `${JSON.stringify(k)}: ${JSON.stringify(v)}`).join(", ")} }`).join(",\n")}\n  ]\n}\n`);
+          const others = Object.entries(list).filter(([k]) => k !== "decks").map(([k, v]) => `  ${JSON.stringify(k)}: ${JSON.stringify(v)},\n`).join("");   // userLang… stay
+          await fs.writeFile(OWN_LIST, `{\n${others}  "decks": [\n${list.decks.map(d => `    { ${Object.entries(d).map(([k, v]) => `${JSON.stringify(k)}: ${JSON.stringify(v)}`).join(", ")} }`).join(",\n")}\n  ]\n}\n`);
         }
         served.push({ dir, port: next, id });
         await serveDeck(dir, next);
         return json(res, 201, { id, port: next, dir: path.relative(ROOT, dir) });
       }
-      if (p === "/api/deck" && req.method === "GET") return json(res, 200, await loadDeck(url.searchParams.get("lang") === "en" ? "en" : "fr"));
+      if (p === "/api/deck" && req.method === "GET") return json(res, 200, await loadDeck(viewLang(url)));
 
       if (p === "/api/slides" && req.method === "POST") {
         const { after, brief = {} } = await body(req);
@@ -879,7 +906,7 @@ Get ready: read ${rel(path.join(SLIDES, slide, "slide.html"))} now. Change no fi
           const file = path.join(dir, "voice." + (/mp4/.test(mime) ? "m4a" : "webm"));
           await fs.writeFile(file, Buffer.from(audio, "base64"));
           const uv = tool("uv");
-          const { stdout } = await promisify(execFile)(uv.file, uv.args(["run", ...CUDA, path.join(ROOT, "tools", "transcribe.py"), ks, file]), { env: TOOL_ENV, shell: uv.shell, windowsHide: true });
+          const { stdout } = await promisify(execFile)(uv.file, uv.args(["run", ...CUDA, path.join(ROOT, "tools", "transcribe.py"), ks, file, "--lang", USER_LANG]), { env: TOOL_ENV, shell: uv.shell, windowsHide: true });
           said = JSON.parse(stdout.trim().split("\n").at(-1));
         }
         const { errors } = await readSession(id);

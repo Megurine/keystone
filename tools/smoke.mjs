@@ -33,12 +33,16 @@ async function deck(dir, port) {
     for (let i = 0; i < 50 && !info; i++) { try { info = await (await fetch(`${base}/api/info`)).json(); } catch { await sleep(200); } }
     check(!!info, `${dir}: server starts${info ? "" : `\n${log}`}`);
     if (!info) return;
-    const { slides = [] } = await (await fetch(`${base}/api/deck`)).json();
-    check(slides.length > 0, `${dir}: ${slides.length} slides`);
-    for (const lang of ["", "?lang=en"]) {
-      const bad = [];
-      for (const s of slides) { const r = await fetch(`${base}/render/${s.id}${lang}`); if (r.status !== 200) bad.push(`${s.id} (${r.status})`); }
-      check(!bad.length, `${dir}: every slide renders${lang ? " in English" : ""}${bad.length ? `: ${bad.join(", ")}` : ""}`);
+    const { slides = [], languages = [] } = await (await fetch(`${base}/api/deck`)).json();
+    check(slides.length > 0, `${dir}: ${slides.length} slides, languages ${languages.join(", ")}`);
+    for (const lang of languages) {   // each of the deck's languages: every slide renders, translated (<html lang>) and up to date
+      const bad = [], view = await (await fetch(`${base}/api/deck?lang=${lang}`)).json();
+      for (const s of view.slides) {
+        const r = await fetch(`${base}/render/${s.id}?lang=${lang}`), html = await r.text();
+        if (r.status !== 200) bad.push(`${s.id} (${r.status})`);
+        else if (s.styled && (!s.translated || s.outdated || !html.includes(`<html lang="${lang}">`))) bad.push(`${s.id} (not translated)`);
+      }
+      check(!bad.length, `${dir}: every slide renders in ${lang}${bad.length ? `: ${bad.join(", ")}` : ""}`);
     }
     for (const f of ["/", "/public/theme.css", "/public/components/stage.js", "/public/assets/brand/sa-monogram-white.svg"]) {
       const r = await fetch(base + f); check(r.status === 200, `${dir}: GET ${f} (${r.status})`);
@@ -67,7 +71,8 @@ try {
   for (const f of ["index.html", "talk.json", "slides/cover/en.html", "slides/cover/fr.html", "slides/cover/thumb-en.webp", "../index.json", "../_shared/theme.css"]) {
     check(fs.existsSync(path.join(talk, f)), `publish: talks/hello/${f}`);
   }
-  check(/Hello Keystone/.test(fs.readFileSync(path.join(talk, "slides", "cover", "en.html"), "utf8")), "publish: English slide is in English");
+  check(/Hello Keystone/.test(fs.readFileSync(path.join(talk, "slides", "cover", "en.html"), "utf8")), "publish: the English slide is in English");
+  check(/Bonjour Keystone/.test(fs.readFileSync(path.join(talk, "slides", "cover", "fr.html"), "utf8")), "publish: the French slide is in French");
 } catch (e) { check(false, `publish\n${e.stderr || e.message}`); }
 finally { fs.rmSync(out, { recursive: true, force: true }); }
 

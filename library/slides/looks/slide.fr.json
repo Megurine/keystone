@@ -1,0 +1,11 @@
+{
+  "blocks": {
+    "3D RENDERING": "RENDU 3D",
+    "The looks of stage.js": "Les rendus de stage.js",
+    "Exact colours: checkers, UVs, diagrams": "Couleurs exactes&nbsp;: damiers, UV, schémas",
+    "Clean shapes, schematic scenes": "Formes nettes, scènes schématiques",
+    "Real materials, neutral light, AO and soft shadow": "Vrais matériaux, lumière neutre, AO et ombre douce",
+    "PBR exterior<small>look: \"pbr\", env: \"exterior\"</small><span>Sky and sun, AO and soft shadow</span>": "PBR extérieur<small>look: \"pbr\", env: \"exterior\"</small><span>Ciel et soleil, AO et ombre douce</span>"
+  },
+  "attrs": {}
+}

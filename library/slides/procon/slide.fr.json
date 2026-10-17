@@ -1,0 +1,14 @@
+{
+  "blocks": {
+    "CHAPTER": "CHAPITRE",
+    "A technique: the verdict": "Une technique&nbsp;: le bilan",
+    "<b>+</b> Advantages": "<b>+</b> Avantages",
+    "An advantage, one line if possible": "Un avantage, une ligne si possible",
+    "A second advantage <em>(with a detail)</em>": "Un deuxième avantage <em>(avec une précision)</em>",
+    "<b>−</b> Drawbacks": "<b>−</b> Inconvénients",
+    "A drawback": "Un inconvénient",
+    "A second drawback": "Un deuxième inconvénient",
+    "When to use it: <span>the condition that tips the balance</span>.": "Quand l'utiliser&nbsp;: <span>la condition qui fait pencher la balance</span>."
+  },
+  "attrs": {}
+}

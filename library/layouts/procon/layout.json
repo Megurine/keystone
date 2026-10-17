@@ -14,7 +14,7 @@
       "class": "sa-title",
       "required": true,
       "maxChars": 65,
-      "notes": "usually 'Sujet : le bilan'"
+      "notes": "usually 'Topic: the verdict'"
     },
     "columns": {
       "class": "sa-procon",

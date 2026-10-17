@@ -1,9 +1,12 @@
 {
-  "title": "Bonjour Keystone",
-  "titleEn": "Hello Keystone",
+  "title": "Hello Keystone",
+  "lang": "en",
+  "titles": {
+    "fr": "Bonjour Keystone"
+  },
   "order": [
     "cover",
-    "premiere"
+    "next"
   ],
   "publish": {
     "slug": "hello",
@@ -12,7 +15,7 @@
     "author": "",
     "event": "",
     "date": "",
-    "sourceLang": "fr",
+    "sourceLang": "en",
     "languages": [
       "en",
       "fr"

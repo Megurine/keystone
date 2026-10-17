@@ -1,7 +1,6 @@
 {
-  "title": "Layout : pour et contre",
-  "text": "Exemple : deux colonnes avantages / inconvénients (.sa-procon) et un takeaway. Voir library/README.md.",
-  "prompt": "",
+  "title": "Layout: pros and cons",
+  "text": "Example: two columns of advantages and drawbacks (.sa-procon) and a takeaway. See library/README.md.",
   "notes": "",
   "status": "done"
 }

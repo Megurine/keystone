@@ -25,5 +25,5 @@
     "physical": "MeshPhysicalMaterial in pbr (glass, KHR_materials_*); GLB physical materials are kept by applyLook(model, 'pbr')",
     "glass": "transmission refracts only opaque scene objects: backdrop(scene, camera, paint) from /public/components/backdrop.js, stage ao: false, clear: null"
   },
-  "example": "rendus"
+  "example": "looks"
 }

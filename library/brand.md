@@ -10,8 +10,8 @@ tool keeps the neutral one.
 - Explain the **why**, not only the how.
 - Show expertise (demos, numbers, diagrams); do not claim it.
 - Banned words: cutting-edge, innovative / innovant, passionate / passionné, highest quality, premium.
-- Talks: French by default, technical terms in English, English text in `slide.en.json` (one `slide.html`, see
-  `CLAUDE.md`). Keep the speaker's wording.
+- Talks: in the deck's language (`lang` in `deck.json`, English by default); technical terms keep their usual
+  English form. Other languages in `slide.<lang>.json` (one `slide.html`, see `CLAUDE.md`). Keep the speaker's wording.
 
 ## Colour
 
@@ -35,8 +35,9 @@ tool keeps the neutral one.
 - Sizes: title 42, lead 26, body and lists 24, takeaway 28. Content headings 26 (22 in small cards), big values
   34 (40), card text 18, lists in a card 20, captions 14 mono, labels 12 mono caps.
 - Titles in sentence case (see `styles/rail/style.md`); chapter names in capitals.
-- French typography: a non-breaking space (`&nbsp;`) before `: ; ? !` and between a number and its unit
-  (`10,24&nbsp;px/cm`). English text (`slide.en.json`) has no space before `: ; ? !`.
+- Typography follows the language. English: no space before `: ; ? !`, numbers as 10.24 and 2,048. French: a
+  non-breaking space (`&nbsp;`) before `: ; ? !` and between a number and its unit (`10,24&nbsp;px/cm`). In both, a
+  non-breaking space between a number and its unit (`46&nbsp;px`).
 
 ## Logos
 

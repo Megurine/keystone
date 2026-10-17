@@ -1,7 +1,6 @@
 {
-  "title": "Layout : sommaire",
-  "text": "Exemple : la liste des chapitres (.sa-agenda). Voir library/README.md.",
-  "prompt": "",
+  "title": "Layout: agenda",
+  "text": "Example: the list of chapters (.sa-agenda). See library/README.md.",
   "notes": "",
   "status": "done"
 }

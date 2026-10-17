@@ -1,0 +1,12 @@
+{
+  "blocks": {
+    "CHAPTER": "CHAPITRE",
+    "What we learned": "Ce qu'on a appris",
+    "One or two sentences that state the idea. <b>Key terms</b> in bold, <span>one idea in red</span>.": "Une ou deux phrases qui posent l'idée. Les <b>termes</b> en gras, <span>une seule idée en rouge</span>.",
+    "A plain point, red square": "Un point neutre, carré rouge",
+    "A second point <em>(with a grey aside)</em>": "Un deuxième point <em>(avec un aparté gris)</em>",
+    "A third point, one line if possible": "Un troisième point, une ligne si possible",
+    "The sentence the audience keeps, <span>with its key word in red</span>.": "La phrase que le public doit garder, <span>avec son mot clé en rouge</span>."
+  },
+  "attrs": {}
+}

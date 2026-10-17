@@ -1,0 +1,6 @@
+{
+  "title": "Three component: frosted glass",
+  "text": "An example of the style library: MeshPhysicalMaterial (transmission, roughness, ior, thickness, dispersion) and a painted background (backdrop.js) that the glass refracts. See library/components/three/.",
+  "notes": "",
+  "status": "done"
+}

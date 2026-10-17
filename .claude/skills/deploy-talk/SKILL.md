@@ -13,7 +13,7 @@ reader the visitor uses. Format, paths and allowlist: Keystone `CLAUDE.md`, "Pub
 1. **Settings.** Read the deck's `deck.json`. It needs a `publish` block:
    ```json
    "publish": { "slug": "deferred", "title": "Deferred rendering, step by step", "description": "…", "author": "Jane Doe",
-                "event": "", "date": "", "sourceLang": "fr", "languages": ["en", "fr"],
+                "event": "", "date": "", "languages": ["en", "fr"],
                 "first": "anatomie-frame", "skip": ["demo-unreal"], "cover": "anatomie-frame", "requires": "webgl" }
    ```
    Optional `"listed": false`: published, but kept out of `talks/index.json` and of links from other talks.

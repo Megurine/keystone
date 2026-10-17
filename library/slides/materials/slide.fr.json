@@ -1,0 +1,12 @@
+{
+  "blocks": {
+    "3D RENDERING": "RENDU 3D",
+    "glTF materials in Keystone": "Matériaux glTF dans Keystone",
+    "Clearcoat<small>KHR_materials_clearcoat</small>": "Vernis<small>KHR_materials_clearcoat</small>",
+    "Iridescence<small>KHR_materials_iridescence</small>": "Irisation<small>KHR_materials_iridescence</small>",
+    "Sheen<small>KHR_materials_sheen</small>": "Velours<small>KHR_materials_sheen</small>",
+    "Brushed metal<small>KHR_materials_anisotropy</small>": "Métal brossé<small>KHR_materials_anisotropy</small>",
+    "Exported from Blender, read as they are by GLTFLoader: <span>no extra code</span>.": "Exportés depuis Blender, lus tels quels par GLTFLoader&nbsp;: <span>aucun code en plus</span>."
+  },
+  "attrs": {}
+}

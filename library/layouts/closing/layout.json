@@ -8,7 +8,7 @@
     "title": {
       "class": "sa-cover-title sa-section-title is-high",
       "required": true,
-      "notes": "MERCI&nbsp;!"
+      "notes": "THANK YOU!"
     },
     "recap": {
       "class": "sa-closing",

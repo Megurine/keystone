@@ -1,0 +1,6 @@
+{
+  "title": "Three component: glTF materials",
+  "text": "An example of the style library: the KHR_materials_* extensions (dispersion, clearcoat, iridescence, sheen, anisotropy), with live settings on the glass sphere. See library/components/three/.",
+  "notes": "",
+  "status": "done"
+}

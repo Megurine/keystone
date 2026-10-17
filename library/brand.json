@@ -12,8 +12,8 @@
     "neverSay": []
   },
   "language": {
-    "slides": "fr",
-    "translation": "slide.en.json (text only; slide.html is the single markup)",
+    "slides": "deck.json \"lang\" (default en)",
+    "translation": "slide.<lang>.json (text only; slide.html is the single markup)",
     "keepTechnicalTermsInEnglish": true
   },
   "colour": {
@@ -67,7 +67,10 @@
     "titleCase": "sentence",
     "chapterCase": "upper",
     "titleRedWord": false,
-    "frenchSpaces": "&nbsp; before : ; ? ! and between a number and its unit"
+    "typography": {
+      "en": "no space before : ; ? !; 10.24, 2,048",
+      "fr": "&nbsp; before : ; ? ! and between a number and its unit; 10,24, 2 048"
+    }
   },
   "canvas": {
     "width": 1280,

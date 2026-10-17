@@ -1,7 +1,6 @@
 {
-  "title": "Layout : démo",
-  "text": "Exemple : une slide intercalaire sans numéro avant une démo. Voir library/README.md.",
-  "prompt": "",
+  "title": "Layout: demo",
+  "text": "Example: an unnumbered break before a live demo. See library/README.md.",
   "notes": "",
   "status": "done"
 }

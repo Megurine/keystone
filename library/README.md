@@ -21,10 +21,10 @@ and `npm run shots` (with that server running) refreshes the screenshots. Each `
 | layout | [list](layouts/list/layout.md) | One idea, 2–6 points, optional takeaway | `list` |
 | layout | [intro-visual](layouts/intro-visual/layout.md) | Text column + one square visual (speaker, studio) | `intro-visual` |
 | layout | [canvas](layouts/canvas/layout.md) | Free content under the title: figures, cards, diagrams, 3D | `cards`, `diagram` |
-| layout | [procon](layouts/procon/layout.md) | Advantages and drawbacks in two columns ("… : le bilan") | `procon` |
+| layout | [procon](layouts/procon/layout.md) | Advantages and drawbacks in two columns ("…: the verdict") | `procon` |
 | layout | [agenda](layouts/agenda/layout.md) | The list of chapters | `agenda` |
 | layout | [demo](layouts/demo/layout.md) | Un-numbered break before a live demo | `demo` |
-| layout | [closing](layouts/closing/layout.md) | Last slide: MERCI, recap or QR code | `closing` |
+| layout | [closing](layouts/closing/layout.md) | Last slide: THANK YOU, recap or QR code | `closing` |
 | layout | [sources](layouts/sources/layout.md) | References by chapter, with links | `sources` |
 | component | [list](components/list/component.md) | `.sa-list` bullets: plain, pro (+), con (−) | `list` |
 | component | [takeaway](components/takeaway/component.md) | Closing line at the bottom | `list` |
@@ -35,7 +35,7 @@ and `npm run shots` (with that server running) refreshes the screenshots. Each `
 | component | [monogram](components/monogram/component.md) | Giant brand mark cut by the edge | `cover` |
 | component | [diagram](components/diagram/component.md) | Pipeline nodes, links, tiles (`diagram.css`) | `diagram` |
 | component | [anim](components/anim/component.md) | Entrance animations (`data-in`) | `diagram` |
-| component | [three](components/three/component.md) | three.js scenes in a slide: looks, glass, glTF materials | `rendus`, `materiaux`, `verre` |
+| component | [three](components/three/component.md) | three.js scenes in a slide: looks, glass, glTF materials | `looks`, `materials`, `glass` |
 
 ## How to choose (LLM workflow)
 

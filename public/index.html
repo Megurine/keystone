@@ -329,7 +329,7 @@
       <button id="b-ov">Overview<kbd>O</kbd></button>
       <button id="b-ed">Edit<kbd>E</kbd></button>
       <button id="b-fs">Fullscreen<kbd>F</kbd></button>
-      <button id="b-lang" title="French / English version">FR · EN<kbd>L</kbd></button>
+      <button id="b-lang" title="The deck in another of its languages" hidden><kbd>L</kbd></button>
       <button id="b-fb" title="Record feedback for Claude: draw on the slides and speak. While recording, N adds a slide after this one">Feedback<kbd>R</kbd></button>
       <span class="fb-level" id="fb-level" title="Microphone level"><i></i></span>
       <button id="b-tasks" title="Feedback sessions and Claude's tasks">Tasks<kbd>T</kbd></button>
@@ -415,13 +415,23 @@ const MAC = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent), C
 if (!MAC) for (const k of document.querySelectorAll("kbd")) k.textContent = k.textContent.replace("⌘", CMD);
 // Optional alternative style for the whole deck: /?style=b-editorial
 const STYLE = new URLSearchParams(location.search).get("style") ? `&style=${new URLSearchParams(location.search).get("style")}` : "";
-// English version of the deck: /?lang=en (slide.html + slides/<id>/slide.en.json, French slide when missing)
-const LANG = new URLSearchParams(location.search).get("lang") === "en" ? "en" : "fr";
-const Q = STYLE + (LANG === "en" ? "&lang=en" : "");
-function switchLang() {
+// The deck in another of its languages: /?lang=<code> (slide.html + slides/<id>/slide.<code>.json; a slide with no
+// translation shows in the deck's own language). None: the deck's own language ("lang" in deck.json).
+const ASKED_LANG = (l => /^[a-z]{2}$/.test(l || "") ? l : null)(new URLSearchParams(location.search).get("lang"));
+let LANG = ASKED_LANG;   // the language shown, known once the deck is loaded
+const Q = STYLE + (ASKED_LANG ? `&lang=${ASKED_LANG}` : "");
+function switchLang() {   // the deck's next language
+  const ls = deck.languages || [], next = ls[(ls.indexOf(LANG) + 1) % ls.length];
+  if (!next || next === LANG) return;
   const u = new URL(location.href);
-  if (LANG === "en") u.searchParams.delete("lang"); else u.searchParams.set("lang", "en");
+  if (next === deck.source) u.searchParams.delete("lang"); else u.searchParams.set("lang", next);
   location.href = u.href;
+}
+function showLang() {   // the language button: the deck's languages, the one shown in bold; hidden for a deck in one language
+  const ls = deck.languages || [];
+  $("b-lang").hidden = ls.length < 2;
+  $("b-lang").innerHTML = ls.map(l => l === LANG ? `<b>${l.toUpperCase()}</b>` : l.toUpperCase()).join(" · ") + "<kbd>L</kbd>";
+  document.documentElement.lang = LANG;
 }
 const stage = $("stage");
 let deck = { slides: [] }, cur = 0, frames = new Map(), dirty = false, box = { s: 1, x: 0, y: 0 };
@@ -509,7 +519,8 @@ function reloadFrame(id) {
 
 async function loadDeck() {
   const curId = deck.slides[cur]?.id;
-  deck = await api("/api/deck" + (LANG === "en" ? "?lang=en" : ""));
+  deck = await api("/api/deck" + (ASKED_LANG ? `?lang=${ASKED_LANG}` : ""));
+  LANG = deck.lang; showLang();
   document.title = deck.title;
   syncFrames();
   // Stay on the same slide when others were added, moved or deleted
@@ -1216,13 +1227,13 @@ function hideClawd(after, timed = true) { // timed: the bar shows the time left
   caHide = setTimeout(() => { $("claude-at").classList.add("out"); caHide = setTimeout(() => { $("claude-at").hidden = true; caShown = caLine = ""; }, 300); }, after);
 }
 // Claude's voice (the panel's "Voice" switch): the sentence that ends a run, and each new question, read aloud by
-// the browser with a French voice of this computer. Never while recording: the microphone would hear it and Whisper
+// this computer or by the browser, in the user's language ("userLang"). Never while recording: the microphone would hear it and Whisper
 // would write it down as the user's words. What ends meanwhile is said when the recording stops.
 let voiceOn = false, voiceSeen = null, voiceQueue = [], fbLoaded = false;
 try { voiceOn = !!localStorage.getItem("ks-voice"); } catch {}
 // Who speaks. The presenter open on the computer that serves it (localhost): that Mac or Windows PC, with its system
 // voice (POST /api/say; on a Mac a Siri voice chosen in System Settings is used, and a browser cannot use one). Open from another
-// device: the browser, with a French voice of that device only. Chrome also has "Google français", which is ready
+// device: the browser, with a voice of the user's language on that device only. Chrome also has "Google" voices, ready
 // first and would be used when no voice is named, but it sends the text to Google. The device's voices arrive a
 // moment after the first request: they are asked for when the page opens, and a sentence waits for them (2 s at
 // most; none: it is not said).
@@ -1238,8 +1249,8 @@ async function speak(text) {
 }
 function browserSpeak(text, tries = 0) {
   const rank = v => /premium|enhanced|siri/i.test(v.name) ? 0 : /thomas/i.test(v.name) ? 1 : /am[ée]lie|jacques/i.test(v.name) ? 2 : 3; // a downloaded voice first, then the classic ones
-  const voice = voices.filter(v => /^fr/i.test(v.lang) && v.localService).sort((a, b) => rank(a) - rank(b))[0];
-  if (!voice) return tries < 7 ? setTimeout(() => browserSpeak(text, tries + 1), 300) : (voiceEvent({ end: true }), console.warn("No French voice on this device: nothing is said"));
+  const lang = deck.userLang || "en", voice = voices.filter(v => v.lang.toLowerCase().startsWith(lang) && v.localService).sort((a, b) => rank(a) - rank(b))[0];
+  if (!voice) return tries < 7 ? setTimeout(() => browserSpeak(text, tries + 1), 300) : (voiceEvent({ end: true }), console.warn(`No ${lang} voice on this device: nothing is said`));
   const u = new SpeechSynthesisUtterance(text);
   u.onstart = () => voiceEvent({ start: true, ms: text.length * 70 }); // a browser does not say how long: about 70 ms a letter
   u.onend = u.onerror = () => voiceEvent({ end: true, more: speechSynthesis.pending });
@@ -1379,7 +1390,7 @@ function buildOverview() {
     const b = document.createElement("button"); b.className = "thumb" + (k === cur ? " on" : "");
     const f = document.createElement("iframe"); f.src = `/render/${s.id}?x=1${Q}`; f.loading = "lazy"; f.tabIndex = -1;
     const todo = s.brief.status === "todo" || !s.styled;
-    const missing = LANG === "en" && s.styled && !s.en, outdated = LANG === "en" && s.styled && s.enOutdated;
+    const other = LANG !== deck.source, missing = other && s.styled && !s.translated, outdated = other && s.styled && s.outdated;
     const cap = document.createElement("span"); cap.className = "cap";
     cap.innerHTML = `<span></span><span class="${todo || missing || outdated ? "todo" : ""}">${todo ? "To style" : missing ? "Not translated" : outdated ? "Translation outdated" : ""}</span>`;
     cap.firstChild.textContent = `${k + 1}. ${s.brief.title || s.id}`;
@@ -1393,7 +1404,7 @@ function buildOverview() {
 // The other decks of this server (keystone.json), each on its own port of the same host
 async function buildDecks() {
   const nav = $("ov-decks");
-  const { current, decks } = await api("/api/decks" + (LANG === "en" ? "?lang=en" : "")).catch(() => ({ decks: [] }));
+  const { current, decks } = await api("/api/decks" + (ASKED_LANG ? `?lang=${ASKED_LANG}` : "")).catch(() => ({ decks: [] }));
   nav.hidden = false; nav.innerHTML = "";
   // "+ New deck": asks for a title and a style guide (those of library/styles), creates decks/<id>/ with a cover
   // slide to style, and opens it
@@ -1467,8 +1478,6 @@ $("b-lang").onclick = switchLang;
 $("b-fb").onclick = () => rec ? stopFeedback() : startFeedback();
 $("b-tasks").onclick = () => toggleTasks();
 $("b-dsl").onclick = () => toggleDsl();
-$("b-lang").innerHTML = (LANG === "en" ? "<b>EN</b> · FR" : "<b>FR</b> · EN") + "<kbd>L</kbd>";
-document.documentElement.lang = LANG;
 addEventListener("resize", () => { fit(); renderChecks(); });
 addEventListener("hashchange", () => show((parseInt(location.hash.slice(1)) || 1) - 1, { fromHash: true }));
 

@@ -1,0 +1,16 @@
+{
+  "blocks": {
+    "CHAPTER": "CHAPITRE",
+    "Example: a crate and a corridor": "Exemple&nbsp;: une caisse et un couloir",
+    "A figure on the left, <b>cards</b> on the right: one value per card, <span>the most important one in red</span>.": "Une figure à gauche, des <b>cartes</b> à droite&nbsp;: une valeur par carte, <span>la plus importante en rouge</span>.",
+    "Scene view": "Vue de la scène",
+    "Same <b>2048 × 2048</b> texture on both objects": "Même texture <b>2048 × 2048</b> sur les deux objets",
+    "Prop · 0.5&nbsp;m crate": "Prop · caisse de 0,5&nbsp;m",
+    "13.7<small>px/cm</small>": "13,7<small>px/cm</small>",
+    "Above the 10.24&nbsp;px/cm target.": "Au-dessus de la cible de 10,24&nbsp;px/cm.",
+    "Environment · 20&nbsp;m corridor": "Environnement · couloir de 20&nbsp;m",
+    "Ten times below the target: <b>one texture is no longer enough</b>.": "Dix fois sous la cible&nbsp;: <b>une seule texture ne suffit plus</b>.",
+    "Source: one mono line, at the bottom of the content area": "Source&nbsp;: une ligne mono, en bas de la zone de contenu"
+  },
+  "attrs": {}
+}

@@ -6,8 +6,8 @@
 //   node tools/deploy.mjs <deck folder> --out <folder> [--url https://example.com]
 //
 // The talk's settings are the "publish" block of the deck's deck.json:
-//   { "slug", "title", "description", "author", "event", "date", "languages": ["en", "fr"] (first = default),
-//     "sourceLang": "fr" (language of slide.html), "first", "skip": [ids], "cover": id, "requires": "webgl" | "webgpu" | "",
+//   { "slug", "title", "description", "author", "event", "date", "languages": ["en", "fr"] (first = default; default:
+//     the deck's own language only), "sourceLang" (language of slide.html; default: the deck's "lang", else "en"), "first", "skip": [ids], "cover": id, "requires": "webgl" | "webgpu" | "",
 //     "listed": false (optional: published, but kept out of talks/index.json and of links from other talks) }
 //
 // The site's address (for og: tags) is --url, else "url" in public/reader/site.json, whose "name" is the site name in the
@@ -56,8 +56,8 @@ const URL_BASE = (URL_ARG || SITE.url || "").replace(/\/$/, "");
 if (!pub?.slug) { console.error(`No "publish" block with a "slug" in ${path.join(DECK_DIR, "deck.json")}`); process.exit(1); }
 
 const SLUG = pub.slug;
-const LANGS = pub.languages || [pub.sourceLang || "fr"];
-const SOURCE_LANG = pub.sourceLang || "fr";
+const LANGS = pub.languages || [pub.sourceLang || deck.lang || "en"];
+const SOURCE_LANG = pub.sourceLang || deck.lang || "en";
 const TALKS = path.join(OUT, "talks");
 const TALK = path.join(TALKS, SLUG);
 const SHARED = path.join(TALKS, "_shared");

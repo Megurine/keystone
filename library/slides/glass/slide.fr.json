@@ -1,0 +1,12 @@
+{
+  "blocks": {
+    "3D RENDERING": "RENDU 3D",
+    "Frosted glass in WebGL": "Verre dépoli en WebGL",
+    "The glass lets light through, a little milky": "Le verre laisse passer la lumière, un peu laiteux",
+    "What is behind turns blurry": "Ce qui est derrière devient flou",
+    "Thin plate: little offset": "Plaque fine&nbsp;: peu de décalage",
+    "Thin rainbow fringes on the edges": "Fines franges arc-en-ciel sur les bords",
+    "Painted on the background, not a light": "Peint sur le fond, pas une lumière"
+  },
+  "attrs": {}
+}

@@ -21,7 +21,7 @@ try {
   await new Promise(r => ws.onopen = r);
   ws.onmessage = e => { const m = JSON.parse(e.data); if (m.id && pending.has(m.id)) { pending.get(m.id)(m.result); pending.delete(m.id); } };
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 720, deviceScaleFactor: 1, mobile: false });
-  await send("Page.navigate", { url: `http://localhost:${process.env.PORT || 4321}/${process.env.DECK_LANG === "en" ? "?lang=en" : ""}#${slide}` });
+  await send("Page.navigate", { url: `http://localhost:${process.env.PORT || 4321}/${/^[a-z]{2}$/.test(process.env.DECK_LANG || "") ? `?lang=${process.env.DECK_LANG}` : ""}#${slide}` });
   await sleep(2500);
   for (const a of actions.split(",")) {
     const [k, v] = a.split(":");

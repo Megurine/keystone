@@ -1,6 +1,9 @@
 {
-  "title": "Bibliothèque de styles",
-  "titleEn": "Style library",
+  "title": "Style library",
+  "lang": "en",
+  "titles": {
+    "fr": "Bibliothèque de styles"
+  },
   "order": [
     "cover",
     "style-rail",
@@ -12,9 +15,9 @@
     "intro-visual",
     "diagram",
     "demo",
-    "rendus",
-    "materiaux",
-    "verre",
+    "looks",
+    "materials",
+    "glass",
     "sources",
     "closing"
   ]

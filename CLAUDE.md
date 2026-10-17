@@ -63,7 +63,7 @@ Tool (URL `/public/…`):
 - `library/` — the style library (brand, style, layouts, components); also a deck of example slides.
 
 Deck folder (URL `/deck/…` for its files, `/slides/<id>/…` for slide folders):
-- `deck.json` — deck title (`title`, `titleEn`), style guide (`style`, optional), slide order (`order`, array of slide ids), optional `publish` settings.
+- `deck.json` — deck title (`title`, in the deck's language; `titles: { "<lang>": … }` in the others), language (`lang`: the language `slide.html` is written in, `en` by default), style guide (`style`, optional), slide order (`order`, array of slide ids), optional `publish` settings.
 - `slides/<id>/brief.json` — what the user wrote in the editor: `title`, `text`, `notes`, `status` (`todo` | `done`).
 - `slides/<id>/slide.html` — the styled slide (an HTML fragment, 1280×720). Missing = the brief is shown as a draft.
 - `slides/<id>/reference.png` — optional original slide (e.g. Keynote), for comparison.
@@ -72,7 +72,7 @@ Deck folder (URL `/deck/…` for its files, `/slides/<id>/…` for slide folders
 - `feedback/<YYYYMMDD-HHMMSS>/` — feedback sessions: `feedback.ks`, `voice.webm`, one picture per slide visit (not in git).
 - `screenshots/` — `npm run shots` output; `.trash/` — deleted slides.
 
-## Styling a slide (the "habiller" workflow)
+## Styling a slide
 
 The user writes briefs in the browser editor (key `E`): title, text, speaker notes. Saving a changed title or text
 sets `status: "todo"`. What the user wants from Claude comes through feedback sessions (see "Feedback sessions"): a
@@ -89,15 +89,15 @@ Slide fragment conventions:
 - Structure (style « Rail »): every content slide = `<header class="sa-head"><img class="sa-logo" …><h1 class="sa-band">CHAPTER</h1></header>` (red rail on the left, chapter stacked upright) + `<h2 class="sa-title">Slide title</h2>` (sentence case). The deck's CLAUDE.md lists its chapters. Chapter slides are numbered covers (`.sa-section-num` + `.sa-section-title` [+ `.sa-section-sub`]).
 - Text scale: title 42 (`.sa-title`), lead 26 (`.sa-lead`, top 150), body & lists 24 (`.sa-list` with `.pro` + / `.con` − / plain ■), captions 14 mono. Closing line: `.sa-takeaway` (bottom, same place everywhere). Content lives between x 73–1207 and y ≈ 150–660.
 - Other components: `.sa-monogram` (`monogram.webp`; `.is-faint` for 10 %), cover (`<!-- body: sa-cover -->` on the first line), `.sa-cover-photo`, `.sa-wordmark`, `.sa-cover-title`. Content pieces: `.sa-card` (`.is-key`), `.sa-stat`, `.sa-label`, `.sa-heading` (26 / `.is-small` 22), `.sa-caption`, `.sa-source`, `.sa-procon`, `.sa-agenda`, `.sa-sources`, `.sa-closing`, `.sa-qr`, `.sa-list.is-placed` (see `library/README.md`). Don't create per-slide title/subtitle/list/card/label variants: use or extend the theme.
-- Titles: sentence case, white, one or two lines; French text gets `&nbsp;` before `: ; ? !` (rules: `library/styles/rail/style.md`). Rules are 1px.
+- Titles: sentence case, white, one or two lines; typography follows the deck's language (French: `&nbsp;` before `: ; ? !`; rules: `library/styles/rail/style.md`, `library/brand.md`). Rules are 1px.
 - Palette: only the tokens of `public/tokens.css` in CSS (`var(--red)`, never `#ee342c`). Raw colours stay only where CSS variables cannot go (canvas and three.js code, SVG presentation attributes) and for data colours. Display type Poppins (titles), body Helvetica. No other colors unless the feedback asks.
 - Assets: brand images `/public/assets/brand/...`, deck media `/deck/assets/...`; files placed in the slide's own folder can be referenced relatively.
 - Images are WebP (never PNG or JPEG, except `*.uhdr.jpg` environments). New PNG/JPEG files: `node tools/webp.mjs <folder> …` converts them in place (lossless for diagrams and data images such as splat maps and checkers, lossy .9 for renders and photos) and rewrites every reference; `--dry` lists first.
 - Slide-local `<style>` and `<script>` are fine. The presenter fires `sa:enter` and `sa:leave` on the slide's `window` and toggles `body.sa-active` (use them to start videos or animations).
-- Slide text is in French by default; only technical terms stay in English. Translate English copy from sketches.
+- Slide text is in the deck's language (`lang` in `deck.json`, English by default); technical terms keep their usual English form. Translate copy written in another language (a sketch, a note).
 - Keep the user's wording. Fix nothing in their text unless the feedback asks.
 - Several slides on one subject: each slide is one idea and reads on its own. Its title says the idea. Do not label
-  the slides as parts of a list: no "Réponse n° 1", "Problème 2", "Partie 3", "Étape 2/5", "Suite" in a title or a
+  the slides as parts of a list: no "Answer 1", "Problem 2", "Part 3", "Step 2/5", "Continued" (or the same in any language) in a title or a
   lead, and no sentence that points at another slide ("comme vu avant", "la réponse au problème 2"). The order of the
   slides gives the sequence. (Items inside one slide can be numbered when their order matters.)
 
@@ -111,16 +111,17 @@ Generic components (`public/components/`):
 - `display.js` (loaded by every slide page) — canvases must render at `saPixelRatio()` (devicePixelRatio × the slide's on-screen scale; the presenter scales slides with a CSS transform, so `devicePixelRatio` alone, or a fixed 2×, is too low on a big screen) and re-size on `sa:resize`. Use the helpers: three.js `fitRenderer(renderer, w, h, redraw)` from `/public/components/canvas.js` (stage.js figures get it already); 2D `saCanvas2d(el, w, h, redraw, units)` (a global, so classic scripts can use it; modules: `canvas2d` from `canvas.js`), which draws in slide px × `units` (`units` 2 keeps code written for a fixed 2× canvas).
 - The presenter keeps only slides within ±2 of the current one loaded (WebGL context limit).
 
-## English version
+## Languages
 
-- One slide, two languages: `slide.html` holds the only markup, styles and code (French); `slides/<id>/slide.en.json` holds the English text (`tools/i18n.mjs`). `/render/<id>?lang=en` builds the English page from both, with `<html lang="en">`; no `slide.en.json` = the French slide. Deck title: `titleEn` in `deck.json`.
-- `slide.en.json` = `{ "blocks": { "<French innerHTML of an element>": "<English innerHTML>" }, "attrs": { "<French alt/title/aria-label>": "<English>" } }`. A block is an element's whole content (a heading, paragraph, list item, label; a whole `<ul>` when the list itself changes), so bold, links and line breaks can move. Keys are copied exactly from `slide.html` and must not nest (one block per element).
-- Strings written by code: `saT("Rouge", "Red")` (display.js), number formats `n.toLocaleString(saT("fr-FR", "en-US"))`. Components that write text can also check `document.documentElement.lang`.
-- Longer English text that needs room: an `html[lang="en"] …` CSS rule in `slide.html` (never a second copy of the slide).
-- Presenter: `/?lang=en`, or the `FR · EN` button / key `L`. The overview flags styled slides without translation as “Not translated”, and “Translation outdated” when the French was edited after translating (some blocks no longer match: those parts show in French).
-- When a French slide is (re)styled or its text edited, update its `slide.en.json` (code changes need nothing). English punctuation (no space before ? ! :), English number format (2,048).
-- Check: `DECK_LANG=en npm run shots [-- ids]` → `<deck>/screenshots/en/`; `DECK_LANG=en node tools/cdp-check.mjs …` (PowerShell: `$env:DECK_LANG="en"; npm run shots`).
-- Briefs, notes and fact checks stay in French (checks are anchored on French text, so their dots sit unplaced on the right in English mode).
+- A deck is written in one language: `lang` in `deck.json` (English by default; "+ New deck" uses the user's language, below). `slide.html` holds the only markup, styles and code, in that language. A translation into another language is `slides/<id>/slide.<lang>.json` (`tools/i18n.mjs`): `/render/<id>?lang=<lang>` builds that page from both, with `<html lang="<lang>">`; no translation = the slide in the deck's language. The deck's languages: its own first, then `languages` in `deck.json` or else every language a slide has a translation for. Deck title in another language: `titles` in `deck.json`.
+- `slide.<lang>.json` = `{ "blocks": { "<innerHTML of an element in slide.html>": "<translated innerHTML>" }, "attrs": { "<alt/title/aria-label in slide.html>": "<translated>" } }`. A block is an element's whole content (a heading, paragraph, list item, label; a whole `<ul>` when the list itself changes), so bold, links and line breaks can move. Keys are copied exactly from `slide.html` and must not nest (one block per element).
+- Strings written by code: `saT({ en: "Red", fr: "Rouge" })` (display.js; a missing language gets the first one); numbers: `n.toLocaleString(document.documentElement.lang)`. `saT("Rouge", "Red")` (French, English) is the older form. Components that write text can also check `document.documentElement.lang`.
+- Longer text in one language that needs room: an `html[lang="<lang>"] …` CSS rule in `slide.html` (never a second copy of the slide).
+- Presenter: `/?lang=<lang>`, or the language button / key `L` (the next language of the deck). The overview flags styled slides without translation as “Not translated”, and “Translation outdated” when `slide.html` was edited after translating (some blocks no longer match: those parts show in the deck's language).
+- When a slide is (re)styled or its text edited, update its translations (code changes need nothing), with the typography of each language (English: no space before `? ! :`, 2,048; French: `&nbsp;` before `: ; ? !`, 2&nbsp;048).
+- Check: `DECK_LANG=<lang> npm run shots [-- ids]` → `<deck>/screenshots/<lang>/`; `DECK_LANG=<lang> node tools/cdp-check.mjs …` (PowerShell: `$env:DECK_LANG="fr"; npm run shots`).
+- Briefs, notes and fact checks are in the deck's language (checks are anchored on the text of `slide.html`, so their dots sit unplaced on the right in another language).
+- The user's language is another setting: `userLang` in `decks/keystone.json` (else `keystone.json`; English by default). Claude's tasks, questions and spoken answers are in it, the voice is transcribed in it, and new decks are written in it.
 
 ## Fact checks (bulles de vérification)
 
@@ -140,13 +141,13 @@ number, an `Enum::Value`, the name of an earlier statement, or a value `Type(arg
 
 ```
 Session session("20261012-093412");
-Enter e1(Time(0), "qui-suis-je");
+Enter e1(Time(0), "who-am-i");
 Stroke s1(Kind::Loop, Color::Red, Span(3634, 5059), Point(948, 559), Point(765, 275), Point(1009, 81), Point(921, 541));
 Target t1(s1, "img.sa-intro-visual", "");
-Say v1(Span(4150, 5050), Word(4150, "tu"), Word(4200, "prends"), Word(4350, "cette"), Word(4550, "image"), Word(4850, "là"));
+Say v1(Span(4150, 5050), Word(4150, "take"), Word(4350, "this"), Word(4550, "image"), Word(4850, "here"));
 Undo u1(Time(7181), s2);
-Task k1(State::Todo, "qui-suis-je", "Retourner la photo (miroir horizontal)", s1, v1);
-Reply r1(k1, "Plutôt une rotation de 180°.");
+Task k1(State::Todo, "who-am-i", "Flip the photo (horizontal mirror)", s1, v1);
+Reply r1(k1, "Rather a 180° rotation.");
 Close c1(k1);
 ```
 
@@ -167,15 +168,15 @@ Handling feedback:
 
 1. Find work: sessions whose `feedback.ks` has no `Task` and no `About` line (new), or has `State::Todo` tasks.
    Never take a `State::Stopped` task: the user interrupted it.
-2. Read the file and its pictures. Match words and strokes by time: "ça", "ici", "cette image" point at the stroke
+2. Read the file and its pictures. Match words and strokes by time: "this", "here", "that image" point at the stroke
    drawn while they were said (the voice starts 0.2 to 0.5 s after its stroke). `Target` says what a stroke is on.
 3. Append one `Task` per request at the end of the file, then do them: `State::Todo` → `State::Doing` → `State::Done`.
-   The task text is in French and says what will be done. Unclear or two possible meanings: `State::Ask` with the
+   The task text is in the user's language (`userLang`) and says what will be done. Unclear or two possible meanings: `State::Ask` with the
    question as text, and do not change the slide. Run `node tools/ks.mjs <file>` after every edit of the file.
    The presenter's panel (key `T`) shows the tasks live, in three groups: questions for the user (`State::Ask`),
    in progress (`Doing`, `Todo`), done (folded). One row per task: keep the task text short and start it with the
    action, the row shows two lines of it. The user clears a task with its × (`Close`), or all done tasks at once.
-4. Update `slide.en.json` when French text changed. Screenshots: in a terminal session, check the layout as "Checking
+4. Update the slide's translations (`slide.<lang>.json`) when the text of `slide.html` changed. Screenshots: in a terminal session, check the layout as "Checking
    layout" says. In a run started by the server ("Claude with no terminal"), take none for a first change: it is slow,
    so the user looks at the slide and comes back when something is wrong (a `Reply` or a follow-up). Then, for that
    task, take the screenshot, look at it and fix. Do not tell the user that no screenshot was taken: it is the rule,
@@ -189,12 +190,12 @@ New slides. Two ways, both through feedback:
 - The user adds a slide while recording (key `N`, or the editor's "+ Slide after") and speaks on it: the session is on
   a slide "not styled yet" whose brief title is still "New slide". Write its `brief.json` from what was said (`title`,
   `text`: the user's words, tidied; `status: "done"`), then write its `slide.html`.
-- The user asks for one ("ajoute une slide après celle-ci qui…"): create `slides/<id>/` (id: a short lowercase slug not
+- The user asks for one ("add a slide after this one that…"): create `slides/<id>/` (id: a short lowercase slug not
   used yet) with `brief.json` (`title`, `text`, `notes: ""`, `status: "done"`) and `slide.html`, and put the id in the
   `order` of the deck's `deck.json`, right after the slide the user was on unless they say where. The Task's slide id
   is the new slide, so its pin is there.
 A slide with 3D is a task for the strong pass; any other slide, for the fast one.
-When the user asks for several slides at once ("fais-moi cinq ou six slides qui expliquent…"), each part of the
+When the user asks for several slides at once ("make me five or six slides that explain…"), each part of the
 subject is one slide with its own title, with no numbering of the parts (see "Slide fragment conventions").
 
 Pins: while the panel is open (and while recording), each task is a pin on its slide, at the centre of the strokes it
@@ -211,10 +212,10 @@ Reading rules:
   slide, so a request can be about several slides, or about the slide shown just before or just after the words (the
   `Enter` times say which slide was on screen, not always which slide the words are about). One task per request,
   on the slide it changes; a request for several slides gets one task per slide.
-- An `Undo` stroke does not count. Words such as "ah non", "je me suis trompé", "oublie ça" cancel what was said or
+- An `Undo` stroke does not count. Words such as "no wait", "I got it wrong", "forget that" cancel what was said or
   drawn just before. A `Kind::Scribble` over an earlier stroke cancels that stroke; over a slide element it usually
   means "remove this" (the words decide).
-- Whisper invents words on noises with no speech ("Sous-titrage ST' 501", "Merci d'avoir regardé"): ignore them.
+- Whisper invents words on noises with no speech ("Thanks for watching!", in French "Sous-titrage ST' 501"): ignore them.
   A word that looks wrong is often a technical term misheard ("nanny" = Nanite).
 
 Claude with no terminal: the panel has a switch, "Claude auto" (off by default, kept per deck in
@@ -258,17 +259,17 @@ thoughts). In the strong pass, write one short sentence to the user before each 
 The panel's "Voice" switch makes Claude say aloud the sentences that end a run and each new question, never while
 the user records (the microphone would hear it). The presenter open on the computer that serves it: that computer
 speaks with its system voice (`POST /api/say {text}` or `{stop: true}`). A Mac: `say` (System Settings › Accessibility ›
-Spoken Content chooses it, a Siri voice works). Windows: PowerShell and System.Speech, with a French voice
+Spoken Content chooses it, a Siri voice works). Windows: PowerShell and System.Speech, with a voice of the user's language
 (Settings › Time & language › Speech; none: the browser speaks). Linux: the browser speaks. The server tells the pages when the voice starts, with its length, and when it
 stops: the popup's bar shrinks with the voice and the popup leaves when Claude has finished speaking (voice off: after
-12 s). Open from another device: the browser speaks, with a French voice of that device. So end a
-run with one or two short sentences to the user, in plain spoken French: no code, no file name.
+12 s). Open from another device: the browser speaks, with a voice of the user's language on that device. So end
+a run with one or two short sentences to the user, in plain spoken words of the user's language: no code, no file name.
 Speed: a step of a run takes 1 to 2 s, so the server puts all the pending feedback in the prompt (session files,
 picture paths, slide files) with a four-step procedure, starts no run when nothing is pending, and loads no connector
 (MCP). The pictures are taken while the voice is transcribed. Thinking is the longest and least steady part of a
 run: the models and the effort of the two levels are `FAST` and `STRONG` in `server.js`.
 
-How it works: `POST /api/feedback {events, audio}` writes the session and runs `uv run tools/transcribe.py`
+How it works: `POST /api/feedback {events, audio}` writes the session and runs `uv run tools/transcribe.py` (in the user's language, `userLang`)
 (`large-v3-turbo` on this computer: mlx-whisper on a Mac with Apple silicon, faster-whisper elsewhere, on an NVIDIA GPU
 when `nvidia-smi` is found (the server adds the CUDA libraries to uv), else on the CPU; the brief of the slide on screen is its vocabulary; the sound level
 drops words invented over silence and puts each word where its sound is). `/render/<id>?feedback=<session>&visit=<n>`

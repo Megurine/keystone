@@ -64,11 +64,11 @@ Keystone runs on macOS, Windows and Linux (`npm run check` tests it on yours). W
 | | macOS | Windows | Linux |
 |---|---|---|---|
 | Transcription | [mlx-whisper](https://github.com/ml-explore/mlx-examples/tree/main/whisper) on Apple silicon (faster-whisper on Intel) | [faster-whisper](https://github.com/SYSTRAN/faster-whisper): on an NVIDIA GPU (the CUDA libraries, about 1 GB, download with the first recording), else the CPU | faster-whisper, as on Windows |
-| Claude's spoken answers | System voice (`say`) | A French system voice (Settings › Time & language › Speech › add French); without one, the browser's voices | The browser's voices |
+| Claude's spoken answers | System voice (`say`) | A system voice of your language (Settings › Time & language › Speech); without one, the browser's voices | The browser's voices |
 | Shortcuts | `⌘` | `Ctrl` | `Ctrl` |
 
-Environment variables in the examples below are written for macOS and Linux (`DECK_LANG=en npm run shots`); in
-PowerShell: `$env:DECK_LANG="en"; npm run shots`.
+Environment variables in the examples below are written for macOS and Linux (`DECK_LANG=fr npm run shots`); in
+PowerShell: `$env:DECK_LANG="fr"; npm run shots`.
 
 Server settings, as environment variables:
 
@@ -119,7 +119,7 @@ A deck folder can live anywhere on disk; `decks/` is only the place Keystone loo
 | `O` | Overview: every slide, the other decks of the server, **+ New deck** |
 | `E` | Editor: the brief of the slide, its speaker notes, a message to Claude |
 | `F` | Full screen |
-| `L` | French / English (also `?lang=en` in the address) |
+| `L` | The deck's next language (also `?lang=fr` in the address) |
 | `R` | Record feedback (`R` again saves, `Escape` twice discards, `⌘Z` takes the last stroke back, `N` adds a slide) |
 | `T` | Tasks: Claude's tasks from the feedback sessions, "Claude auto", the log of the last run |
 | `D` | The feedback language as it is written |
@@ -132,11 +132,11 @@ the current one loaded, so decks with many WebGL slides stay within the browser'
 
 ```
 my-talk/
-  deck.json                  title, titleEn, style, order (the slide ids), publish settings
+  deck.json                  title, lang, style, order (the slide ids), publish settings
   slides/<id>/
     brief.json               what the slide must say: title, text, notes, status (todo | done)
     slide.html               the styled slide (missing: the brief is shown as a draft)
-    slide.en.json            the English text of the slide
+    slide.fr.json            the slide's text in another language (French here)
     checks.json              fact checks on the slide's text (optional)
   assets/                    the deck's media, at /deck/assets/…
   components/                the deck's own JS/CSS, at /deck/components/…
@@ -199,7 +199,7 @@ what Claude does, and a review dialog shows each changed slide before and after,
 are the `FAST` and `STRONG` constants of `server.js`.
 
 The voice is transcribed on your machine by `tools/transcribe.py` (Whisper, through uv; see [Install](#install)).
-The recognition language is French by default (`--lang` in the script).
+It listens in your language (`userLang`, below).
 
 ## The style system
 
@@ -253,27 +253,30 @@ Write your brand's tone and rules in `decks/CLAUDE.md`, so Claude follows them f
 
 ## Languages
 
-A slide has one source, `slide.html` (markup, styles and code, in French), and its English text in
-`slide.en.json`. The English page is built from both, so a layout change is made once.
+Each deck is written in one language, set in `deck.json` (`"lang": "en"` by default), and can be translated into
+others. A slide keeps one `slide.html` (markup, styles and code, in the deck's language); each translation is a
+`slide.<lang>.json` next to it, so a layout change is made once. The example decks are written in English and
+translated into French (`slide.fr.json`).
 
 ```json
 {
-  "blocks": { "Ce qu'on a appris": "What we learned", "Un point <b>clé</b>": "A <b>key</b> point" },
-  "attrs":  { "Photo du studio": "Photo of the studio" }
+  "blocks": { "What we learned": "Ce qu'on a appris", "A <b>key</b> point": "Un point <b>clé</b>" },
+  "attrs":  { "Photo of the studio": "Photo du studio" }
 }
 ```
 
 - `blocks`: the whole content of an element (a title, a paragraph, a list item), so bold, links and line breaks can
   move in the translation. `attrs`: `alt`, `title` and `aria-label` values.
-- Text written by code: `saT("Rouge", "Red")`; numbers: `n.toLocaleString(saT("fr-FR", "en-US"))`.
-- English text that needs more room: an `html[lang="en"] …` rule in the slide's `<style>`.
-- The deck's English title: `titleEn` in `deck.json`.
-- In the presenter: `L` or `?lang=en`. The overview marks styled slides "Not translated", and "Translation outdated"
-  when the French changed after the translation (the parts that no longer match show in French).
-- Screenshots of the English version: `DECK_LANG=en npm run shots`.
+- Text written by code: `saT({ en: "Red", fr: "Rouge" })`; numbers: `n.toLocaleString(document.documentElement.lang)`.
+- Text that needs more room in one language: an `html[lang="fr"] …` rule in the slide's `<style>`.
+- The deck's title in other languages: `"titles": { "fr": "…" }` in `deck.json`.
+- In the presenter: `L` (the deck's next language) or `?lang=fr`. The overview marks styled slides "Not translated",
+  and "Translation outdated" when `slide.html` changed after the translation (those parts show in the deck's language).
+- Screenshots of a translation: `DECK_LANG=fr npm run shots` → `<deck>/screenshots/fr/`.
+- Published talks list their languages in `publish.languages` (the first is the default).
 
-The presenter knows two languages, French (source) and English. A published talk can list its languages and its
-source language in its `publish` settings (`languages`, `sourceLang`); the interface of Keystone itself is in English.
+**Your language** is a separate setting: `"userLang": "fr"` in `decks/keystone.json` (English by default). Claude writes
+its tasks and questions and speaks to you in it, your voice is transcribed in it, and new decks are written in it.
 
 ## 3D in slides
 

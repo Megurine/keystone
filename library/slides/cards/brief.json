@@ -1,7 +1,6 @@
 {
-  "title": "Composants : carte, valeur, label, légende, source",
-  "text": "Exemple : une figure, deux cartes (.sa-card, .sa-stat, .sa-label), une légende (.sa-caption) et une source (.sa-source). Voir library/README.md.",
-  "prompt": "",
+  "title": "Components: card, value, label, caption, source",
+  "text": "Example: a figure, two cards (.sa-card, .sa-stat, .sa-label), a caption (.sa-caption) and a source (.sa-source). See library/README.md.",
   "notes": "",
   "status": "done"
 }

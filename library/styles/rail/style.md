@@ -17,10 +17,12 @@ A change of the theme changes every slide of every deck that uses this style.
   Texel density, CPU vs GPU).
 - One line when possible, two at most (about 65 characters). Longer: split the slide or move words to the lead.
 - Patterns used in the talks:
-  - a series on one subject: `Sujet&nbsp;: étape` (Deferred rendering&nbsp;: le G-Buffer, … : le bilan);
-  - the summary of a part: `Sujet&nbsp;: le bilan` (with the `procon` layout when there are pros and cons);
-  - a worked case: `Exemple&nbsp;: …`;
-  - a question the slide answers (Pourquoi des résolutions différentes&nbsp;?).
+  - a series on one subject: `Topic: step` (Deferred rendering: the G-Buffer, …: the verdict);
+  - the summary of a part: `Topic: the verdict` (with the `procon` layout when there are pros and cons);
+  - a worked case: `Example: …`;
+  - a question the slide answers (Why different resolutions?).
+  In French, the same patterns take a non-breaking space before the colon or the question mark
+  (`Deferred rendering&nbsp;: le G-Buffer`, `Pourquoi des résolutions différentes&nbsp;?`).
 - The same title may stay on 2–3 slides in a row when they show one idea step by step.
 
 ## Rail text (`.sa-band`)
@@ -37,8 +39,8 @@ in `.sa-band` (content slides) or `.sa-section-title` (chapter slides).
 Markup, first lines of every content slide:
 
 ```html
-<header class="sa-head"><img class="sa-logo" src="/public/assets/brand/sa-monogram-white.svg" alt=""><h1 class="sa-band">CHAPITRE</h1></header>
-<h2 class="sa-title">Titre de la slide</h2>
+<header class="sa-head"><img class="sa-logo" src="/public/assets/brand/sa-monogram-white.svg" alt=""><h1 class="sa-band">CHAPTER</h1></header>
+<h2 class="sa-title">Slide title</h2>
 ```
 
 ## Old variants

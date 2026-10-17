@@ -9,10 +9,10 @@ import os from "node:os";
 import { CHROME, CHROME_FLAGS } from "./chrome.mjs";
 
 const PORT = process.env.PORT || 4321;
-// DECK_LANG=en npm run shots → English version into screenshots/en/
-const EN = process.env.DECK_LANG === "en";
+// DECK_LANG=<code> npm run shots → the deck in that language (its translations) into screenshots/<code>/
+const LANG = /^[a-z]{2}$/.test(process.env.DECK_LANG || "") ? process.env.DECK_LANG : null;
 const { dir: DECK_DIR } = await (await fetch(`http://localhost:${PORT}/api/info`)).json();
-const out = path.join(DECK_DIR, "screenshots", EN ? "en" : "");
+const out = path.join(DECK_DIR, "screenshots", LANG || "");
 fs.mkdirSync(out, { recursive: true });
 const { order } = JSON.parse(fs.readFileSync(path.join(DECK_DIR, "deck.json"), "utf8"));
 const only = process.argv.slice(2);
@@ -26,7 +26,7 @@ order.forEach((id, i) => {
   // A profile of its own: with the default one, Windows hands the command to a Chrome already open, which shoots nothing.
   // On Windows the first start of a new profile can end before the picture is written: wait for it, else shoot again.
   for (let tries = 0; tries < 2 && !fs.existsSync(file); tries++) {
-    execFileSync(CHROME, [...CHROME_FLAGS, `--user-data-dir=${profile}`, "--window-size=1280,720", "--virtual-time-budget=3000", `--screenshot=${file}`, `http://localhost:${PORT}/render/${id}${EN ? "?lang=en" : ""}`], { stdio: "ignore" });
+    execFileSync(CHROME, [...CHROME_FLAGS, `--user-data-dir=${profile}`, "--window-size=1280,720", "--virtual-time-budget=3000", `--screenshot=${file}`, `http://localhost:${PORT}/render/${id}${LANG ? `?lang=${LANG}` : ""}`], { stdio: "ignore" });
     for (let t = 0; t < 50 && !fs.existsSync(file); t++) sleep(100);
   }
   console.log(fs.existsSync(file) ? file : `missing: ${file}`);
