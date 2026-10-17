@@ -11,7 +11,7 @@ tool keeps the neutral one.
 - Show expertise (demos, numbers, diagrams); do not claim it.
 - Banned words: cutting-edge, innovative / innovant, passionate / passionné, highest quality, premium.
 - Talks: in the deck's language (`lang` in `deck.json`, English by default); technical terms keep their usual
-  English form. Other languages in `slide.<lang>.json` (one `slide.html`, see `CLAUDE.md`). Keep the speaker's wording.
+  English form. Other languages in `slide.<lang>.json` (one `slide.html`, see `AGENTS.md`). Keep the speaker's wording.
 
 ## Colour
 

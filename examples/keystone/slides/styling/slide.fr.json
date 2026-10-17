@@ -1,7 +1,7 @@
 {
   "blocks": {
     "Claude styles the slides to do": "Claude habille les slides à faire",
-    "Claude follows <b>CLAUDE.md</b> and the <b>style library</b>: the rail, the titles, <span>one idea in red</span>.": "Claude suit <b>CLAUDE.md</b> et la <b>bibliothèque de styles</b>&nbsp;: le rail, les titres, <span>une seule idée en rouge</span>.",
+    "Claude follows <b>AGENTS.md</b> and the <b>style library</b>: the rail, the titles, <span>one idea in red</span>.": "Claude suit <b>AGENTS.md</b> et la <b>bibliothèque de styles</b>&nbsp;: le rail, les titres, <span>une seule idée en rouge</span>.",
     "In a terminal": "Dans un terminal",
     "Claude writes each slide, checks it on a screenshot, and marks it done.": "Claude écrit chaque slide, la vérifie sur une capture et la marque faite.",
     "No terminal": "Sans terminal",

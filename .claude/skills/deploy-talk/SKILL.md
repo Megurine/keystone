@@ -6,7 +6,7 @@ description: Publish a Keystone deck as a read-only talk, into a website's publi
 # Deploy a talk
 
 Keystone publishes one deck at a time with `tools/deploy.mjs` into the website's talk format; `public/reader/` is the
-reader the visitor uses. Format, paths and allowlist: Keystone `CLAUDE.md`, "Publishing", and the script's header.
+reader the visitor uses. Format, paths and allowlist: Keystone `AGENTS.md`, "Publishing", and the script's header.
 
 ## 1. Before deploying
 
