@@ -1,0 +1,25 @@
+<header class="sa-head"><img class="sa-logo" src="/public/assets/brand/sa-monogram-white.svg" alt=""><h1 class="sa-band">START</h1></header>
+<script src="/public/components/anim.js"></script>
+<h2 class="sa-title" data-in="100">Start in one minute</h2>
+<pre class="sa-code kg-code" data-in="300"><span class="c"># Node 22 or later: nothing else to install</span>
+git clone https://github.com/ancarmona/keystone.git
+cd keystone
+<span class="r">npm start</span></pre>
+<div class="kg-ports" data-in="600">
+  <p class="sa-label is-marked">Then open</p>
+  <dl>
+    <dt>localhost:4321</dt><dd>The style library</dd>
+    <dt>localhost:4322</dt><dd>A small example deck</dd>
+    <dt>localhost:4320</dt><dd>This guide</dd>
+  </dl>
+</div>
+<p class="sa-caption kg-opt" data-in="800">Optional: Claude Code to style slides, Chrome for screenshots, uv to transcribe your voice</p>
+<p class="sa-takeaway" data-in="1100">Your own talks live in <span>decks/</span>, apart from the tool.</p>
+<style>
+  .kg-code { position: absolute; left: 73px; top: 170px; width: 640px; }
+  .kg-ports { position: absolute; left: 765px; top: 170px; width: 442px; display: grid; gap: 14px; }
+  .kg-ports dl { margin: 0; display: grid; grid-template-columns: 170px 1fr; }
+  .kg-ports dt, .kg-ports dd { margin: 0; padding: 10px 0; border-bottom: 1px solid var(--rule); font-size: 20px; line-height: 1.3; }
+  .kg-ports dt { font: 500 16px/26px var(--mono); color: var(--white); }
+  .kg-opt { position: absolute; left: 73px; top: 360px; width: 640px; }
+</style>

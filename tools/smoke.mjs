@@ -62,6 +62,7 @@ async function deck(dir, port) {
 }
 await deck("examples/hello", 4700);
 await deck("library", 4701);
+await deck("examples/keystone", 4703);
 
 // 3. A deck publishes (reader page, slides in both languages, thumbnails)
 const out = fs.mkdtempSync(path.join(os.tmpdir(), "keystone-smoke-"));

@@ -1,0 +1,10 @@
+{
+  "blocks": {
+    "A slide can run a 3D scene": "Une slide peut faire tourner une scène 3D",
+    "Three looks: unlit, simple, pbr": "Trois rendus&nbsp;: unlit, simple, pbr",
+    "Ambient occlusion, soft shadows": "Occlusion ambiante, ombres douces",
+    "Sharp on any screen, fast on a phone": "Net sur tout écran, rapide sur un téléphone",
+    "The slide is the demo: <span>no video, no screenshot</span>.": "La slide est la démo&nbsp;: <span>ni vidéo, ni capture</span>."
+  },
+  "attrs": {}
+}

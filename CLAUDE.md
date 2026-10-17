@@ -1,7 +1,7 @@
 # Keystone — deck tool
 
 Keystone is the local HTML/CSS/JS deck tool (presenter, editor, theme, components). It holds no talk: each deck is a
-folder anywhere on disk (`deck.json` + `slides/`). Example: `examples/hello/`.
+folder anywhere on disk (`deck.json` + `slides/`). Examples: `examples/keystone/` (the guide to Keystone, a deck about itself), `examples/hello/` (a minimal deck).
 
 Your own decks: `decks/` (not in the Keystone repo: `.gitignore`; often a git repository of its own, cloned there):
 - `decks/<id>/` — a deck, with its own `CLAUDE.md` for that talk when it needs one; `decks/CLAUDE.md` for all of them.
@@ -10,7 +10,7 @@ Your own decks: `decks/` (not in the Keystone repo: `.gitignore`; often a git re
 - `decks/public/` — a file here replaces the same file of `public/`, in the server and in published talks: your logos
   (`decks/public/assets/brand/`, same file names), the reader's `site.json`, your tokens. The tool keeps neutral ones.
 
-Run: `node server.js` (`npm start`) serves every deck of `keystone.json` (`library` 4321, `examples/hello` 4322) and of
+Run: `node server.js` (`npm start`) serves every deck of `keystone.json` (`examples/keystone` 4320, the guide to Keystone; `library` 4321; `examples/hello` 4322) and of
 `decks/keystone.json`, each on its own port. `node server.js <deck folder>` (or `DECK=<deck folder>`,
 or no argument from inside a deck folder) serves that deck alone on 4321 (no dependencies, Node ≥ 22; `PORT` to change;
 `HOST` to listen elsewhere than 127.0.0.1, e.g. a Tailscale address to open it on a phone). Pages reload live when any

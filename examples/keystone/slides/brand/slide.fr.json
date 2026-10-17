@@ -1,0 +1,12 @@
+{
+  "blocks": {
+    "YOUR DECKS": "VOS DECKS",
+    "Your talks and your brand stay yours": "Vos talks et votre marque restent à vous",
+    "Keystone comes with a neutral brand": "Keystone a une marque neutre",
+    "A file in <b>decks/public/</b> replaces the tool's own": "Un fichier de <b>decks/public/</b> remplace celui de l'outil",
+    "Your talks never enter the tool's repository": "Vos talks n'entrent jamais dans le dépôt de l'outil",
+    "A <span>git pull</span> updates the tool, never your slides.": "Un <span>git pull</span> met à jour l'outil, jamais vos slides.",
+    "keystone/                <span class=\"c\">the tool</span>\n  decks/                 <span class=\"c\">yours: a git repository of its own</span>\n    keystone.json        <span class=\"c\">your decks, your language</span>\n    my-talk/\n      deck.json          <span class=\"c\">title, language, style, order</span>\n      slides/cover/\n        brief.json       <span class=\"c\">what the slide must say</span>\n        slide.html       <span class=\"c\">the slide</span>\n        slide.fr.json    <span class=\"c\">its text in French</span>\n    <span class=\"r\">public/</span>              <span class=\"c\">your logos, colours, site</span>": "keystone/                <span class=\"c\">l'outil</span>\n  decks/                 <span class=\"c\">à vous : un dépôt git à part</span>\n    keystone.json        <span class=\"c\">vos decks, votre langue</span>\n    my-talk/\n      deck.json          <span class=\"c\">titre, langue, style, ordre</span>\n      slides/cover/\n        brief.json       <span class=\"c\">ce que la slide doit dire</span>\n        slide.html       <span class=\"c\">la slide</span>\n        slide.fr.json    <span class=\"c\">son texte en français</span>\n    <span class=\"r\">public/</span>              <span class=\"c\">vos logos, couleurs, site</span>"
+  },
+  "attrs": {}
+}

@@ -35,6 +35,7 @@ and `npm run shots` (with that server running) refreshes the screenshots. Each `
 | component | [monogram](components/monogram/component.md) | Giant brand mark cut by the edge | `cover` |
 | component | [diagram](components/diagram/component.md) | Pipeline nodes, links, tiles (`diagram.css`) | `diagram` |
 | component | [anim](components/anim/component.md) | Entrance animations (`data-in`) | `diagram` |
+| component | [code](components/code/component.md) | Commands, files, trees (`.sa-code`), keys (`kbd`), screenshots (`.sa-shot`) | `examples/keystone` |
 | component | [three](components/three/component.md) | three.js scenes in a slide: looks, glass, glTF materials | `looks`, `materials`, `glass` |
 
 ## How to choose (LLM workflow)

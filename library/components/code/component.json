@@ -1,0 +1,14 @@
+{
+  "id": "code",
+  "kind": "component",
+  "use": "Commands, files and folder trees; keys of the keyboard; screenshots",
+  "include": [],
+  "classes": {
+    "sa-code": "pre, mono 16 on --ink-3, 1px rule; spans .c .k .s .r",
+    "sa-code.is-small": "mono 13",
+    "kbd": "a key, inline",
+    "sa-shot": "figure > img, framed screenshot"
+  },
+  "rules": { "maxLines": 12, "redSpans": 1 },
+  "example": "examples/keystone"
+}

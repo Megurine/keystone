@@ -1,0 +1,17 @@
+{
+  "blocks": {
+    "Claude works on its own, and talks back": "Claude travaille seul, et vous répond",
+    "Fast pass · Sonnet": "Passe rapide · Sonnet",
+    "Most tasks": "La plupart des tâches",
+    "Text, layout, new slides, diagrams, 2D animations.": "Texte, mise en page, nouvelles slides, schémas, animations 2D.",
+    "Strong pass · Opus": "Passe forte · Opus",
+    "3D and second tries": "La 3D et les reprises",
+    "three.js scenes, shaders, and a task you came back to twice.": "Scènes three.js, shaders, et les tâches reprises deux fois.",
+    "Voice": "Voix",
+    "Claude speaks": "Claude parle",
+    "It says what it did and asks its questions aloud, never while you record.": "Il dit ce qu'il a fait et pose ses questions à voix haute, jamais pendant un enregistrement.",
+    "The bottom-left corner shows each step: reading, working, checking, done": "Le coin en bas à gauche montre chaque étape&nbsp;: lecture, travail, vérification, fini",
+    "Stop it at any time: <span>what changed stays, nothing starts again by itself</span>.": "Arrêtez-le quand vous voulez&nbsp;: <span>ce qui a changé reste, rien ne repart tout seul</span>."
+  },
+  "attrs": {}
+}

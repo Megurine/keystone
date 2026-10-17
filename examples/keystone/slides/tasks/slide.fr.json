@@ -1,0 +1,14 @@
+{
+  "blocks": {
+    "Follow the tasks, correct them": "Suivre les tâches, les corriger",
+    "<kbd>T</kbd> shows what Claude does": "<kbd>T</kbd> montre ce que fait Claude",
+    "Each task is a pin on its slide": "Chaque tâche est un pin sur sa slide",
+    "A <b>?</b> pin is a question for you": "Un pin <b>?</b> est une question pour vous",
+    "Reply, or record a follow-up: Claude takes it again": "Répondez, ou enregistrez une suite&nbsp;: Claude la reprend",
+    "A pin shows the task, the words it comes from, and redraws your strokes": "Un pin montre la tâche, les mots d'où elle vient, et redessine vos traits",
+    "After a change, <span>a review shows each slide before and after</span>.": "Après un changement, <span>une revue montre chaque slide avant et après</span>."
+  },
+  "attrs": {
+    "The tasks panel and an open pin": "Le panneau des tâches et un pin ouvert"
+  }
+}

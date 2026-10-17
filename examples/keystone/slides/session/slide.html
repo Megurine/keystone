@@ -1,0 +1,20 @@
+<header class="sa-head"><img class="sa-logo" src="/public/assets/brand/sa-monogram-white.svg" alt=""><h1 class="sa-band">FEEDBACK</h1></header>
+<script src="/public/components/anim.js"></script>
+<h2 class="sa-title" data-in="100">What Claude receives</h2>
+<p class="sa-lead" data-in="200">A small typed language: each stroke, the element under it, <span>each word with its time</span>.</p>
+<pre class="sa-code kg-code" data-in="400"><span class="k">Enter</span> e1(Time(0), <span class="s">"list"</span>);
+<span class="k">Stroke</span> s1(Kind::Loop, Color::Red, Span(1200, 2600), Point(60, 612), Point(500, 600), …);
+<span class="k">Target</span> t1(s1, <span class="s">"p.sa-takeaway"</span>, <span class="s">"The sentence the audience keeps"</span>);
+<span class="k">Say</span> v1(Span(2800, 5200), Word(2800, <span class="r">"this"</span>), Word(3000, <span class="s">"sentence"</span>), Word(3550, <span class="s">"too"</span>), …);
+<span class="k">Task</span> k1(State::Done, <span class="s">"list"</span>, <span class="s">"Shorten the takeaway: keep the red part"</span>, s1, v1);</pre>
+<div class="kg-notes">
+  <p data-in="700"><kbd>D</kbd> shows it being written, live</p>
+  <p data-in="850">With a picture of each slide and your strokes</p>
+  <p data-in="1000">Claude adds its tasks at the end</p>
+</div>
+<p class="sa-takeaway" data-in="1200">“This”, “here”: Claude matches the word <span>with the stroke drawn at that moment</span>.</p>
+<style>
+  .kg-code { position: absolute; left: 73px; top: 262px; width: 1134px; }
+  .kg-notes { position: absolute; left: 73px; top: 470px; width: 1134px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  .kg-notes p { margin: 0; padding-top: 12px; border-top: 1px solid var(--rule); font-size: 20px; line-height: 1.35; color: var(--field); }
+</style>

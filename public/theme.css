@@ -167,3 +167,21 @@ body.sa-cover { background: var(--red); }
 .sa-qr img { width: 100%; height: 100%; image-rendering: pixelated; }
 .sa-qr ~ .sa-section-sub { top: 505px; }
 .sa-section-sub small { display: block; margin-top: 6px; font-size: 22px; opacity: .85; }
+
+/* Code: a terminal line, a file, a tree. Spans colour it: .c comment, .k keyword or type, .s string, .r the one red
+   thing (a command to type, the value that matters). Position it on the slide. */
+.sa-code { margin: 0; padding: 18px 22px; background: var(--ink-3); outline: 1px solid var(--rule); outline-offset: -1px;
+  font: 400 16px/1.55 var(--mono); color: var(--field); white-space: pre; tab-size: 2; overflow: hidden; }
+.sa-code .c { color: var(--dim); }
+.sa-code .k { color: var(--white); font-weight: 600; }
+.sa-code .s { color: var(--light); }
+.sa-code .r { color: var(--red); }
+.sa-code.is-small { padding: 14px 18px; font-size: 13px; line-height: 1.5; }
+
+/* A key of the keyboard, in text or in a list */
+.sa-slide kbd { display: inline-block; min-width: 1.5em; padding: .08em .45em .12em; border: 1px solid var(--rule-2);
+  border-bottom-width: 2px; font: 500 .8em/1.2 var(--mono); text-align: center; color: var(--white); background: var(--ink-2); }
+
+/* A screenshot of the tool (or of any screen): framed by a 1px rule, never cropped by the theme */
+.sa-shot { display: block; margin: 0; outline: 1px solid var(--rule-2); outline-offset: -1px; }
+.sa-shot img { display: block; width: 100%; height: auto; }

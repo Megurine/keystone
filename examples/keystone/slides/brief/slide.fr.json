@@ -1,0 +1,15 @@
+{
+  "blocks": {
+    "WRITE": "ÉCRIRE",
+    "A slide starts as a brief": "Une slide commence par un brief",
+    "<kbd>E</kbd> opens the editor of the slide": "<kbd>E</kbd> ouvre l'éditeur de la slide",
+    "Title, text, speaker notes: what the slide must say": "Titre, texte, notes&nbsp;: ce que la slide doit dire",
+    "<kbd>⌘</kbd><kbd>S</kbd> saves it as <b>To style</b>": "<kbd>⌘</kbd><kbd>S</kbd> l'enregistre, marquée <b>To style</b>",
+    "<b>+ Slide after</b> adds the next one": "<b>+ Slide after</b> ajoute la suivante",
+    "Until Claude styles it, the slide shows its brief as a draft": "Tant que Claude ne l'a pas habillée, la slide montre son brief en brouillon",
+    "Message to Claude: <span>ask for a change in words</span>.": "Message to Claude&nbsp;: <span>demandez un changement avec des mots</span>."
+  },
+  "attrs": {
+    "The editor beside a slide not styled yet": "L'éditeur à côté d'une slide pas encore habillée"
+  }
+}

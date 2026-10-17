@@ -1,0 +1,14 @@
+{
+  "blocks": {
+    "START": "DÉMARRER",
+    "Start in one minute": "Démarrer en une minute",
+    "Then open": "Puis ouvrez",
+    "The style library": "La bibliothèque de styles",
+    "A small example deck": "Un petit deck d'exemple",
+    "This guide": "Ce guide",
+    "Optional: Claude Code to style slides, Chrome for screenshots, uv to transcribe your voice": "En option&nbsp;: Claude Code pour habiller les slides, Chrome pour les captures, uv pour transcrire votre voix",
+    "Your own talks live in <span>decks/</span>, apart from the tool.": "Vos talks vivent dans <span>decks/</span>, à part de l'outil.",
+    "<span class=\"c\"># Node 22 or later: nothing else to install</span>\ngit clone https://github.com/ancarmona/keystone.git\ncd keystone\n<span class=\"r\">npm start</span>": "<span class=\"c\"># Node 22 ou plus : rien d'autre à installer</span>\ngit clone https://github.com/ancarmona/keystone.git\ncd keystone\n<span class=\"r\">npm start</span>"
+  },
+  "attrs": {}
+}

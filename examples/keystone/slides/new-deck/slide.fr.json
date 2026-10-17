@@ -1,0 +1,15 @@
+{
+  "blocks": {
+    "START": "DÉMARRER",
+    "Create your deck": "Créer son deck",
+    "<kbd>O</kbd> opens the overview": "<kbd>O</kbd> ouvre la vue d'ensemble",
+    "<b>+ New deck</b>: a title and a style guide": "<b>+ New deck</b>&nbsp;: un titre et un style",
+    "Keystone makes <b>decks/my-talk/</b> with a cover": "Keystone crée <b>decks/my-talk/</b> avec une couverture",
+    "and opens it on a port of its own": "et l'ouvre sur son propre port",
+    "The overview lists every slide, and the other decks of the server at the top": "La vue d'ensemble montre toutes les slides, et en haut les autres decks du serveur",
+    "One deck is one folder: <span>deck.json and slides/</span>.": "Un deck, c'est un dossier&nbsp;: <span>deck.json et slides/</span>."
+  },
+  "attrs": {
+    "The overview with the New deck dialog": "La vue d'ensemble et la fenêtre New deck"
+  }
+}

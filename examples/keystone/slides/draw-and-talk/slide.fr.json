@@ -1,0 +1,15 @@
+{
+  "blocks": {
+    "Draw and talk over your slides": "Dessiner et parler sur ses slides",
+    "<kbd>R</kbd> starts the recording": "<kbd>R</kbd> lance l'enregistrement",
+    "<b>Draw</b> on the slide: circle, underline, point": "<b>Dessinez</b> sur la slide&nbsp;: entourez, soulignez, pointez",
+    "<b>Say</b> what to change, as to a colleague": "<b>Dites</b> ce qu'il faut changer, comme à un collègue",
+    "Change slides as you go": "Changez de slide en parlant",
+    "<kbd>R</kbd> again sends it to Claude": "<kbd>R</kbd> à nouveau l'envoie à Claude",
+    "<kbd>⌘</kbd><kbd>Z</kbd> takes a stroke back · <kbd>Esc</kbd> twice throws the recording away": "<kbd>⌘</kbd><kbd>Z</kbd> retire un trait · <kbd>Esc</kbd> deux fois abandonne l'enregistrement",
+    "Your voice is transcribed <span>on your own computer</span>.": "Votre voix est transcrite <span>sur votre propre ordinateur</span>."
+  },
+  "attrs": {
+    "A recording: two strokes drawn on a slide": "Un enregistrement : deux traits dessinés sur une slide"
+  }
+}

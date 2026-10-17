@@ -1,0 +1,15 @@
+{
+  "blocks": {
+    "Write, let Claude style, correct by talking": "Écrire, laisser Claude habiller, corriger en parlant",
+    "Every slide is an <b>HTML page</b>: it can hold a 3D scene, a diagram that builds step by step, <span>a real demo</span>.": "Chaque slide est une <b>page HTML</b>&nbsp;: elle peut contenir une scène 3D, un schéma qui se construit pas à pas, <span>une vraie démo</span>.",
+    "You": "Vous",
+    "Write the brief": "Écrire le brief",
+    "A title, the text, your notes: what the slide must say.": "Un titre, le texte, vos notes&nbsp;: ce que la slide doit dire.",
+    "Styles the slide": "Habille la slide",
+    "Layout, type and colours, from the style library.": "Mise en page, typographie et couleurs, d'après la bibliothèque de styles.",
+    "Draw and talk": "Dessiner et parler",
+    "Circle a part, say what to change: Claude does it.": "Entourez, dites ce qu'il faut changer&nbsp;: Claude le fait.",
+    "You can write HTML yourself, <span>but you never have to</span>.": "Vous pouvez écrire le HTML vous-même, <span>mais rien ne vous y oblige</span>."
+  },
+  "attrs": {}
+}

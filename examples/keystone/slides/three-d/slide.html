@@ -1,0 +1,34 @@
+<header class="sa-head"><img class="sa-logo" src="/public/assets/brand/sa-monogram-white.svg" alt=""><h1 class="sa-band">3D</h1></header>
+<script src="/public/components/anim.js"></script>
+<h2 class="sa-title" data-in="100">A slide can run a 3D scene</h2>
+<canvas class="kg-view" data-in="300" data-anim="fade"></canvas>
+<pre class="sa-code is-small kg-code" data-in="500"><span class="k">import</span> { stage } <span class="k">from</span> <span class="s">"/public/components/stage.js"</span>;
+
+<span class="k">const</span> { render, scene } = stage(canvas, 520, 400,
+  { look: <span class="r">"pbr"</span>, env: <span class="s">"studio"</span>, draw });
+scene.add(<span class="k">new</span> THREE.Mesh(knot, material));</pre>
+<ul class="sa-list kg-points">
+  <li data-in="700">Three looks: unlit, simple, pbr</li>
+  <li data-in="850">Ambient occlusion, soft shadows</li>
+  <li data-in="1000">Sharp on any screen, fast on a phone</li>
+</ul>
+<p class="sa-takeaway" data-in="1200">The slide is the demo: <span>no video, no screenshot</span>.</p>
+<style>
+  .kg-view { position: absolute; left: 73px; top: 160px; width: 520px; height: 400px; }
+  .kg-code { position: absolute; left: 640px; top: 170px; width: 567px; }
+  .kg-points { position: absolute; left: 640px; top: 350px; width: 567px; gap: 14px; font-size: 22px; }
+</style>
+<script type="module">
+import { THREE, stage, material, playLoop } from "/public/components/stage.js";
+const W = 520, H = 400, canvas = document.querySelector(".kg-view");
+const camera = new THREE.PerspectiveCamera(30, W / H, 0.1, 50);
+camera.position.set(0, 1.4, 4.6); camera.lookAt(0, 0.6, 0);
+const { render, scene, softShadow } = stage(canvas, W, H, { look: "pbr", env: "studio", clear: "#1b1b1c", draw: () => render(camera) });
+const turn = new THREE.Group(); scene.add(turn);
+const knot = new THREE.Mesh(new THREE.TorusKnotGeometry(0.55, 0.19, 220, 28), material("pbr", { color: "#ee342c", roughness: 0.3, metalness: 0.1 }));
+knot.position.y = 0.8; turn.add(knot);
+const floor = new THREE.Mesh(new THREE.PlaneGeometry(8, 8), material("pbr", { color: "#2a2a2b", roughness: 1 }));
+floor.rotation.x = -Math.PI / 2; turn.add(floor);
+render(camera); softShadow(floor, camera);
+playLoop(t => { turn.rotation.y = t * 0.0004; render(camera); });
+</script>

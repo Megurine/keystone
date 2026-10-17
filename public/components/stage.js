@@ -37,7 +37,7 @@ import { loadUltraHDR } from "/public/components/uhdr.js";
 import { softShadow as buildSoftShadow } from "/public/components/softshadow.js";
 export { THREE };
 
-// Each map's settings are in envs.json next to the maps (decks/public/assets/env/ can replace maps and settings):
+// Each map's settings are in envs.json next to the maps (the overlay folder decks/public can replace maps and settings):
 // yaw, pitch (degrees): the map's orientation for a camera looking down -Z: yaw spins it about Y, then pitch tilts it
 // about X (positive: the top of the map leans toward the camera). The sun turns with it. exposure: tone mapping exposure for that
 // map (default 1). sun: the light clipped out of the map, as tools/env.py prints it. Values chosen by eye on test scenes.

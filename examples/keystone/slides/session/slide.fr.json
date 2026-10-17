@@ -1,0 +1,11 @@
+{
+  "blocks": {
+    "What Claude receives": "Ce que Claude reçoit",
+    "A small typed language: each stroke, the element under it, <span>each word with its time</span>.": "Un petit langage typé&nbsp;: chaque trait, l'élément dessous, <span>chaque mot avec son heure</span>.",
+    "<kbd>D</kbd> shows it being written, live": "<kbd>D</kbd> le montre s'écrire, en direct",
+    "With a picture of each slide and your strokes": "Avec une image de chaque slide et de vos traits",
+    "Claude adds its tasks at the end": "Claude ajoute ses tâches à la fin",
+    "“This”, “here”: Claude matches the word <span>with the stroke drawn at that moment</span>.": "«&nbsp;Ça&nbsp;», «&nbsp;ici&nbsp;»&nbsp;: Claude relie le mot <span>au trait dessiné à ce moment-là</span>."
+  },
+  "attrs": {}
+}

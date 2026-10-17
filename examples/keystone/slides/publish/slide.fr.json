@@ -1,0 +1,12 @@
+{
+  "blocks": {
+    "PUBLISH": "PUBLIER",
+    "Publish a talk anywhere": "Publier un talk n'importe où",
+    "Read-only: arrows, overview, full screen, languages": "En lecture seule&nbsp;: flèches, vue d'ensemble, plein écran, langues",
+    "Only the slides leave: no briefs, notes or feedback": "Seules les slides sortent&nbsp;: ni briefs, ni notes, ni feedback",
+    "Any static host: your website, GitHub Pages…": "N'importe quel hébergeur statique&nbsp;: votre site, GitHub Pages…",
+    "Its settings: <span>the publish block of deck.json</span>.": "Ses réglages&nbsp;: <span>le bloc publish de deck.json</span>.",
+    "$ <span class=\"r\">node tools/deploy.mjs decks/my-talk --out site/public</span>\n\ntalks/my-talk/      <span class=\"c\">the reader, the slides in each language, thumbnails</span>\ntalks/_shared/      <span class=\"c\">theme, components, three.js</span>\ntalks/index.json    <span class=\"c\">every talk published there</span>": "$ <span class=\"r\">node tools/deploy.mjs decks/my-talk --out site/public</span>\n\ntalks/my-talk/      <span class=\"c\">le lecteur, les slides dans chaque langue, les vignettes</span>\ntalks/_shared/      <span class=\"c\">thème, composants, three.js</span>\ntalks/index.json    <span class=\"c\">tous les talks publiés là</span>"
+  },
+  "attrs": {}
+}

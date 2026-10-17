@@ -47,8 +47,10 @@ cd keystone
 npm start
 ```
 
-Open <http://localhost:4321> (the style library, one example slide per layout and component) and
-<http://localhost:4322> (a small example deck, `examples/hello`).
+Open <http://localhost:4320>: **the guide to Keystone**, a deck made with Keystone that shows how to create a deck,
+write slides, and work with Claude by drawing and talking (`examples/keystone`, in English and French). Also
+<http://localhost:4321> (the style library, one example slide per layout and component) and <http://localhost:4322>
+(a minimal deck, `examples/hello`).
 
 Optional, for some features:
 

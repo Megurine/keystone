@@ -1,0 +1,24 @@
+<header class="sa-head"><img class="sa-logo" src="/public/assets/brand/sa-monogram-white.svg" alt=""><h1 class="sa-band">KEYS</h1></header>
+<script src="/public/components/anim.js"></script>
+<h2 class="sa-title" data-in="100">The keys to remember</h2>
+<dl class="kg-keys">
+  <div data-in="300"><dt><kbd>→</kbd><kbd>←</kbd></dt><dd>Next, previous</dd></div>
+  <div data-in="360"><dt><kbd>O</kbd></dt><dd>Overview, other decks</dd></div>
+  <div data-in="420"><dt><kbd>E</kbd></dt><dd>Editor of the slide</dd></div>
+  <div data-in="480"><dt><kbd>R</kbd></dt><dd>Record feedback</dd></div>
+  <div data-in="540"><dt><kbd>T</kbd></dt><dd>Claude's tasks</dd></div>
+  <div data-in="600"><dt><kbd>D</kbd></dt><dd>The feedback language</dd></div>
+  <div data-in="660"><dt><kbd>L</kbd></dt><dd>Next language</dd></div>
+  <div data-in="720"><dt><kbd>F</kbd></dt><dd>Full screen</dd></div>
+  <div data-in="780"><dt><kbd>N</kbd></dt><dd>New slide, while recording</dd></div>
+  <div data-in="840"><dt><kbd>⌘</kbd><kbd>S</kbd></dt><dd>Save the brief</dd></div>
+  <div data-in="900"><dt><kbd>⌘</kbd><kbd>↵</kbd></dt><dd>Send to Claude</dd></div>
+  <div data-in="960"><dt><kbd>⌘</kbd><kbd>Z</kbd></dt><dd>Take a stroke back</dd></div>
+</dl>
+<p class="sa-takeaway" data-in="1200">On Windows and Linux, <span>Ctrl</span> takes the place of ⌘.</p>
+<style>
+  .kg-keys { position: absolute; left: 73px; top: 170px; width: 1134px; margin: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 0 40px; }
+  .kg-keys div { display: grid; grid-template-columns: 96px 1fr; align-items: center; padding: 16px 0; border-bottom: 1px solid var(--rule); }
+  .kg-keys dt { font-size: 22px; } .kg-keys dt kbd + kbd { margin-left: 4px; }
+  .kg-keys dd { margin: 0; font-size: 21px; line-height: 1.3; color: var(--field); }
+</style>

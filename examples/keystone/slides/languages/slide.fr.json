@@ -1,0 +1,12 @@
+{
+  "blocks": {
+    "LANGUAGES": "LANGUES",
+    "One slide, several languages": "Une slide, plusieurs langues",
+    "A deck is written in one language and translated into others: <b>slide.html</b> stays the only markup.": "Un deck est écrit dans une langue et traduit dans d'autres&nbsp;: <b>slide.html</b> reste le seul balisage.",
+    "<kbd>L</kbd> shows the next language": "<kbd>L</kbd> passe à la langue suivante",
+    "The overview flags what is not translated": "La vue d'ensemble signale ce qui n'est pas traduit",
+    "Your own language is a setting too": "Votre langue est aussi un réglage",
+    "Press <kbd>L</kbd>: <span>this slide is translated too</span>.": "Appuyez sur <kbd>L</kbd>&nbsp;: <span>cette slide aussi est traduite</span>."
+  },
+  "attrs": {}
+}

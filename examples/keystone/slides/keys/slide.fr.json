@@ -1,0 +1,20 @@
+{
+  "blocks": {
+    "KEYS": "TOUCHES",
+    "The keys to remember": "Les touches à retenir",
+    "Next, previous": "Suivante, précédente",
+    "Overview, other decks": "Vue d'ensemble, autres decks",
+    "Editor of the slide": "Éditeur de la slide",
+    "Record feedback": "Enregistrer un feedback",
+    "Claude's tasks": "Les tâches de Claude",
+    "The feedback language": "Le langage du feedback",
+    "Next language": "Langue suivante",
+    "Full screen": "Plein écran",
+    "New slide, while recording": "Nouvelle slide, en enregistrant",
+    "Save the brief": "Enregistrer le brief",
+    "Send to Claude": "Envoyer à Claude",
+    "Take a stroke back": "Retirer un trait",
+    "On Windows and Linux, <span>Ctrl</span> takes the place of ⌘.": "Sous Windows et Linux, <span>Ctrl</span> remplace ⌘."
+  },
+  "attrs": {}
+}

@@ -1,0 +1,42 @@
+{
+  "title": "Keystone, the guide",
+  "lang": "en",
+  "titles": {
+    "fr": "Keystone, le guide"
+  },
+  "style": "rail",
+  "order": [
+    "cover",
+    "loop",
+    "start",
+    "new-deck",
+    "brief",
+    "styling",
+    "draw-and-talk",
+    "session",
+    "tasks",
+    "auto",
+    "languages",
+    "three-d",
+    "publish",
+    "brand",
+    "keys",
+    "closing"
+  ],
+  "publish": {
+    "slug": "keystone",
+    "title": "Keystone, the guide",
+    "description": "How to make a deck with Keystone: write the slides, let Claude style them, correct them by drawing and talking.",
+    "author": "Sentient Art",
+    "event": "",
+    "date": "",
+    "languages": [
+      "en",
+      "fr"
+    ],
+    "first": "",
+    "skip": [],
+    "cover": "cover",
+    "requires": "webgl"
+  }
+}

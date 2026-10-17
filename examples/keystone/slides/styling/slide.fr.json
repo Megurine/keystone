@@ -1,0 +1,13 @@
+{
+  "blocks": {
+    "Claude styles the slides to do": "Claude habille les slides à faire",
+    "Claude follows <b>CLAUDE.md</b> and the <b>style library</b>: the rail, the titles, <span>one idea in red</span>.": "Claude suit <b>CLAUDE.md</b> et la <b>bibliothèque de styles</b>&nbsp;: le rail, les titres, <span>une seule idée en rouge</span>.",
+    "In a terminal": "Dans un terminal",
+    "Claude writes each slide, checks it on a screenshot, and marks it done.": "Claude écrit chaque slide, la vérifie sur une capture et la marque faite.",
+    "No terminal": "Sans terminal",
+    "Turn on <b>Auto</b> in the tasks panel (<kbd>T</kbd>): the server starts Claude Code after each recording or message.": "Activez <b>Auto</b> dans le panneau des tâches (<kbd>T</kbd>)&nbsp;: le serveur lance Claude Code après chaque enregistrement ou message.",
+    "Each slide reads on its own: <span>one idea, one title</span>.": "Chaque slide se lit seule&nbsp;: <span>une idée, un titre</span>.",
+    "$ <span class=\"r\">claude</span>\n&gt; Style the slides of decks/my-talk\n  that are to do": "$ <span class=\"r\">claude</span>\n&gt; Habille les slides de decks/my-talk\n  qui sont à faire"
+  },
+  "attrs": {}
+}
