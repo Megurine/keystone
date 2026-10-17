@@ -1,0 +1,7 @@
+{
+  "title": "Composants : carte, valeur, label, légende, source",
+  "text": "Exemple : une figure, deux cartes (.sa-card, .sa-stat, .sa-label), une légende (.sa-caption) et une source (.sa-source). Voir library/README.md.",
+  "prompt": "",
+  "notes": "",
+  "status": "done"
+}

@@ -1,0 +1,22 @@
+{
+  "id": "card",
+  "kind": "component",
+  "use": "One idea or one value in a panel beside a figure",
+  "include": [],
+  "classes": {
+    "sa-card": "div, 4px white top bar",
+    "is-key": "red top bar",
+    "sa-note": "p, closing line in the card"
+  },
+  "rules": {
+    "order": [
+      "sa-label",
+      "sa-heading.is-small | sa-stat",
+      "p | ul.sa-list",
+      "sa-note"
+    ],
+    "maxPerSlide": 3,
+    "keyMax": 1
+  },
+  "example": "cards"
+}

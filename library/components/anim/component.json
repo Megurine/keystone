@@ -1,0 +1,13 @@
+{
+  "id": "anim",
+  "kind": "component",
+  "use": "Entrance animations in reading order",
+  "include": ["<script src=\"/public/components/anim.js\"></script>"],
+  "attributes": {
+    "data-in": "delay in ms (required)",
+    "data-anim": ["rise", "fade", "pop", "draw", "wipe", "drop"],
+    "data-dur": "duration in ms (default 500, draw 600)"
+  },
+  "rules": { "order": "reading order", "title": 100, "step": 300, "takeaway": "last", "maxTotalMs": 2500 },
+  "example": "diagram"
+}

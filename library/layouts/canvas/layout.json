@@ -1,0 +1,59 @@
+{
+  "id": "canvas",
+  "kind": "layout",
+  "use": "Free content under the title: diagrams, figures, cards, live demos",
+  "avoid": "Plain text points: use list",
+  "body": "",
+  "slots": {
+    "chapter": {
+      "class": "sa-band",
+      "required": true,
+      "case": "upper"
+    },
+    "title": {
+      "class": "sa-title",
+      "required": true,
+      "maxChars": 65,
+      "case": "sentence"
+    },
+    "lead": {
+      "class": "sa-lead",
+      "required": false,
+      "maxChars": 180
+    },
+    "content": {
+      "class": null,
+      "required": true,
+      "notes": "slide-local markup and CSS; area x 73-1207, y 150 (no lead) or ~262 (lead) to 660 (~600 with takeaway)"
+    },
+    "takeaway": {
+      "class": "sa-takeaway",
+      "required": false,
+      "maxChars": 90
+    },
+    "source": {
+      "class": "sa-source",
+      "required": false,
+      "notes": "one mono line at y 668"
+    }
+  },
+  "patterns": {
+    "card": "components/card: .sa-card (.is-key) with .sa-label, .sa-heading.is-small or .sa-stat, p; often x 813 width 394",
+    "figure": "view on --ink-3 with 1px --rule outline; .sa-label in its corner; .sa-caption under it",
+    "figures": "2-4 views in a grid, gap 24; .sa-heading + .sa-label under each",
+    "diagram": "components/diagram",
+    "live": "canvas or components/three + a card"
+  },
+  "components": [
+    "card",
+    "stat",
+    "label",
+    "caption",
+    "diagram",
+    "anim",
+    "three",
+    "list",
+    "takeaway"
+  ],
+  "example": "cards"
+}

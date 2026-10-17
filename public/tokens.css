@@ -1,0 +1,22 @@
+/* Keystone design tokens: colours and type. One file for every deck and the published talks
+   (tools/deploy.mjs copies it to /css/tokens.css). Use these, never raw colours. */
+
+:root {
+  --ink: #1b1b1c;       /* page and slide ground */
+  --ink-2: #252526;     /* raised surface: cards, nodes, panels */
+  --ink-3: #141415;     /* sunken surface: screens, viewports */
+  --rule: #3a3a3b;      /* the one rule: 1px */
+  --rule-2: #4a4a4b;    /* outline that must read on --ink-2 */
+  --dim: #6a6a6c;       /* inactive text and marks */
+  --gray: #9b9b9b;      /* labels, captions */
+  --field: #c9c9c9;     /* secondary text on dark */
+  --light: #ececec;     /* body text that sits next to white titles */
+  --white: #fff;
+  --red: #ee342c;
+
+  --display: "Poppins", "Helvetica Neue", Arial, sans-serif;
+  --body: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --mono: "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+
+  color-scheme: dark;
+}

@@ -1,0 +1,38 @@
+{
+  "id": "procon",
+  "kind": "layout",
+  "use": "Advantages and drawbacks of one technique",
+  "avoid": "More than two sides: use cards",
+  "body": "",
+  "slots": {
+    "chapter": {
+      "class": "sa-band",
+      "required": true,
+      "case": "upper"
+    },
+    "title": {
+      "class": "sa-title",
+      "required": true,
+      "maxChars": 65,
+      "notes": "usually 'Sujet : le bilan'"
+    },
+    "columns": {
+      "class": "sa-procon",
+      "required": true,
+      "notes": "section > h3 (<b>+</b>/<b>−</b> + word) + ul.sa-list li.pro / li.con",
+      "min": 2,
+      "max": 5
+    },
+    "takeaway": {
+      "class": "sa-takeaway",
+      "required": false,
+      "maxChars": 90
+    }
+  },
+  "components": [
+    "list",
+    "takeaway",
+    "anim"
+  ],
+  "example": "procon"
+}

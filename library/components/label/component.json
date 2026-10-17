@@ -1,0 +1,19 @@
+{
+  "id": "label",
+  "kind": "component",
+  "use": "Mono caps labels and content headings",
+  "include": [],
+  "classes": {
+    "sa-label": "mono 12 caps grey",
+    "sa-label.is-marked": "red square before",
+    "sa-heading": "Poppins 26, h3",
+    "sa-heading.is-small": "22, in cards"
+  },
+  "rules": {
+    "headingSizes": [
+      26,
+      22
+    ]
+  },
+  "example": "cards"
+}

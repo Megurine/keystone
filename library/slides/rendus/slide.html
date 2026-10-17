@@ -1,0 +1,56 @@
+<header class="sa-head"><img class="sa-logo" src="/public/assets/brand/sa-monogram-white.svg" alt=""><h1 class="sa-band">RENDU 3D</h1></header>
+<script src="/public/components/anim.js"></script>
+<h2 class="sa-title" data-in="100">Les rendus de stage.js</h2>
+
+<div class="rd-row">
+  <figure data-in="300"><canvas></canvas>
+    <figcaption>Unlit<small>look: "unlit"</small><span>Couleurs exactes&nbsp;: damiers, UV, schémas</span></figcaption></figure>
+  <figure data-in="450"><canvas></canvas>
+    <figcaption>Simple<small>look: "simple"</small><span>Formes nettes, scènes schématiques</span></figcaption></figure>
+  <figure data-in="600"><canvas></canvas>
+    <figcaption>PBR studio<small>look: "pbr", env: "studio"</small><span>Vrais matériaux, lumière neutre, AO et ombre douce</span></figcaption></figure>
+  <figure data-in="750"><canvas></canvas>
+    <figcaption>PBR extérieur<small>look: "pbr", env: "exterior"</small><span>Ciel et soleil, AO et ombre douce</span></figcaption></figure>
+</div>
+
+<style>
+  .rd-row { position: absolute; left: 73px; top: 160px; width: 1134px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+  .rd-row figure { margin: 0; }
+  .rd-row canvas { display: block; width: 265px; height: 300px; outline: 1px solid var(--rule); }
+  .rd-row figcaption { margin-top: 18px; font: 500 24px/1.2 var(--display); color: var(--white); }
+  .rd-row small { display: block; margin-top: 8px; font: 12px/1 var(--mono); color: var(--gray); }
+  .rd-row span { display: block; margin-top: 12px; font: 18px/1.35 var(--body); color: var(--light); }
+</style>
+
+<script type="module">
+import { THREE, stage, material, playLoop } from "/public/components/stage.js";
+
+const W = 265, H = 300;
+// A checker in the deck's colours (--red, --light): shows what each look does to a texture.
+const c = document.createElement("canvas"); c.width = c.height = 256;
+const g = c.getContext("2d");
+for (let y = 0; y < 8; y++) for (let x = 0; x < 8; x++) { g.fillStyle = (x + y) % 2 ? "#ee342c" : "#ececec"; g.fillRect(x * 32, y * 32, 32, 32); }
+const checker = new THREE.CanvasTexture(c);
+checker.colorSpace = THREE.SRGBColorSpace;
+checker.wrapS = checker.wrapT = THREE.RepeatWrapping;
+checker.repeat.set(8, 1);
+
+const knot = new THREE.TorusKnotGeometry(0.5, 0.18, 200, 24);
+const looks = [{ look: "unlit" }, { look: "simple" }, { look: "pbr", env: "studio" }, { look: "pbr", env: "exterior" }];
+const figures = looks.map(({ look, env }, i) => {
+  const camera = new THREE.PerspectiveCamera(32, W / H, 0.1, 50);
+  camera.position.set(0, 1.6, 4.7); camera.lookAt(0, 0.65, 0);
+  const draw = () => render(camera);
+  const { render, scene, softShadow } = stage(document.querySelectorAll(".rd-row canvas")[i], W, H, { look, env, clear: "#141415", draw });
+  const turn = new THREE.Group(); scene.add(turn);
+  const mesh = new THREE.Mesh(knot, material(look, { map: checker, roughness: 0.35 }));
+  mesh.position.y = 0.75; turn.add(mesh);
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(6, 6), material(look, { color: "#3a3a3b", roughness: 1 }));
+  floor.rotation.x = -Math.PI / 2; turn.add(floor);       // in the turning group: its soft shadow turns with the knot
+  draw();
+  softShadow(floor, camera);
+  return { turn, draw };
+});
+
+playLoop(t => figures.forEach(f => { f.turn.rotation.y = t * 0.0003; f.draw(); }));
+</script>

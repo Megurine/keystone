@@ -1,0 +1,23 @@
+{
+  "id": "sources",
+  "kind": "layout",
+  "use": "References after the talk",
+  "avoid": "One figure's source: use .sa-source on its slide",
+  "body": "",
+  "slots": {
+    "chapter": {
+      "class": "sa-band",
+      "required": true,
+      "notes": "SOURCES"
+    },
+    "groups": {
+      "class": "sa-sources",
+      "required": true,
+      "notes": "div columns > section > h3 (b number) + ul > li > a (strong, span, code)"
+    }
+  },
+  "components": [
+    "anim"
+  ],
+  "example": "sources"
+}

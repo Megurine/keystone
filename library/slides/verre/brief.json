@@ -1,0 +1,7 @@
+{
+  "title": "Composant three : verre dépoli",
+  "text": "Exemple de la bibliothèque de styles : MeshPhysicalMaterial (transmission, roughness, ior, thickness, dispersion) et un fond peint (backdrop.js) que le verre réfracte. Voir library/components/three/.",
+  "prompt": "",
+  "notes": "",
+  "status": "done"
+}

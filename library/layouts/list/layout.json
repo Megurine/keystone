@@ -1,0 +1,49 @@
+{
+  "id": "list",
+  "kind": "layout",
+  "use": "One idea with 2–6 points, optional closing line",
+  "avoid": "More than 6 points, points that need pictures (canvas), pros and cons (procon)",
+  "body": "",
+  "slots": {
+    "chapter": {
+      "class": "sa-band",
+      "required": true,
+      "case": "upper"
+    },
+    "title": {
+      "class": "sa-title",
+      "required": true,
+      "maxChars": 65,
+      "case": "sentence"
+    },
+    "lead": {
+      "class": "sa-lead",
+      "required": false,
+      "maxChars": 180
+    },
+    "items": {
+      "class": "sa-list is-placed",
+      "required": true,
+      "min": 2,
+      "max": 6,
+      "maxChars": 80,
+      "kinds": [
+        "plain",
+        "pro",
+        "con"
+      ],
+      "notes": "top 170, or 262 after a lead (automatic)"
+    },
+    "takeaway": {
+      "class": "sa-takeaway",
+      "required": false,
+      "maxChars": 90
+    }
+  },
+  "components": [
+    "list",
+    "takeaway",
+    "anim"
+  ],
+  "example": "list"
+}

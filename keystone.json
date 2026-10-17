@@ -1,0 +1,6 @@
+{
+  "decks": [
+    { "dir": "library", "port": 4321 },
+    { "dir": "examples/hello", "port": 4322 }
+  ]
+}

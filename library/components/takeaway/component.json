@@ -1,0 +1,16 @@
+{
+  "id": "takeaway",
+  "kind": "component",
+  "use": "Closing line, same place on every slide",
+  "include": [],
+  "classes": {
+    "sa-takeaway": "p; span = red key phrase"
+  },
+  "rules": {
+    "maxChars": 90,
+    "sentences": 1,
+    "contentBottom": 600,
+    "animateLast": true
+  },
+  "example": "list"
+}

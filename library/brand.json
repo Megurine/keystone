@@ -1,0 +1,88 @@
+{
+  "tone": {
+    "bannedWords": [
+      "cutting-edge",
+      "innovative",
+      "innovant",
+      "passionate",
+      "passionné",
+      "highest quality",
+      "premium"
+    ],
+    "neverSay": []
+  },
+  "language": {
+    "slides": "fr",
+    "translation": "slide.en.json (text only; slide.html is the single markup)",
+    "keepTechnicalTermsInEnglish": true
+  },
+  "colour": {
+    "tokens": [
+      "--ink",
+      "--ink-2",
+      "--ink-3",
+      "--rule",
+      "--rule-2",
+      "--dim",
+      "--gray",
+      "--field",
+      "--light",
+      "--white",
+      "--red"
+    ],
+    "accent": "--red",
+    "rawColoursAllowedIn": [
+      "canvas",
+      "three.js",
+      "SVG presentation attributes",
+      "data colours"
+    ]
+  },
+  "shape": {
+    "rule": "1px var(--rule), never 2px",
+    "borderRadius": 0,
+    "decorativeGradients": false,
+    "marker": "12px square var(--red)",
+    "accentBar": "4px top border of .sa-card (white, or red for the key card)"
+  },
+  "type": {
+    "display": "--display",
+    "body": "--body",
+    "mono": "--mono",
+    "sizes": {
+      "title": 42,
+      "lead": 26,
+      "body": 24,
+      "list": 24,
+      "takeaway": 28,
+      "caption": 14,
+      "label": 12,
+      "heading": 26,
+      "headingSmall": 22,
+      "stat": 34,
+      "statLarge": 40,
+      "cardText": 18,
+      "cardList": 20
+    },
+    "titleCase": "sentence",
+    "chapterCase": "upper",
+    "titleRedWord": false,
+    "frenchSpaces": "&nbsp; before : ; ? ! and between a number and its unit"
+  },
+  "canvas": {
+    "width": 1280,
+    "height": 720,
+    "safeArea": {
+      "left": 73,
+      "right": 1207,
+      "top": 150,
+      "bottom": 660
+    }
+  },
+  "logos": {
+    "rail": "/public/assets/brand/sa-monogram-white.svg",
+    "monogram": "/public/assets/brand/monogram.webp",
+    "wordmark": "/public/assets/brand/wordmark-white.webp",
+    "wordmarkOnLight": "/public/assets/brand/wordmark-color.webp"
+  }
+}

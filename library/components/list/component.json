@@ -1,0 +1,20 @@
+{
+  "id": "list",
+  "kind": "component",
+  "use": "Bullet lists with meaning",
+  "include": [],
+  "classes": {
+    "sa-list": "ul, 24px",
+    "is-placed": "left 73, top 170 / 262 after a lead",
+    "pro": "li, + on white",
+    "con": "li, − on red"
+  },
+  "rules": {
+    "min": 2,
+    "max": 6,
+    "linesPerItem": 2,
+    "fontSize": 24,
+    "inCard": 20
+  },
+  "example": "list"
+}

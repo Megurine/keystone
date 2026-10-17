@@ -1,0 +1,44 @@
+{
+  "id": "chapter",
+  "kind": "layout",
+  "use": "First slide of a chapter",
+  "avoid": "Content; un-numbered breaks: use demo",
+  "body": "sa-cover",
+  "slots": {
+    "photo": {
+      "class": "sa-cover-photo",
+      "required": true,
+      "notes": "the talk's cover photo"
+    },
+    "monogram": {
+      "class": "sa-monogram",
+      "required": true,
+      "notes": "img /public/assets/brand/monogram.webp"
+    },
+    "wordmark": {
+      "class": "sa-wordmark",
+      "required": true
+    },
+    "number": {
+      "class": "sa-section-num",
+      "required": true,
+      "notes": "two digits"
+    },
+    "title": {
+      "class": "sa-cover-title sa-section-title",
+      "required": true,
+      "maxChars": 30,
+      "case": "upper"
+    },
+    "subtitle": {
+      "class": "sa-section-sub",
+      "required": false,
+      "maxChars": 40
+    }
+  },
+  "components": [
+    "monogram",
+    "anim"
+  ],
+  "example": "chapter"
+}

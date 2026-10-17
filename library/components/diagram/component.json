@@ -1,0 +1,17 @@
+{
+  "id": "diagram",
+  "kind": "component",
+  "use": "Pipeline and data-flow diagrams",
+  "include": ["<link rel=\"stylesheet\" href=\"/public/components/diagram.css\">"],
+  "classes": {
+    "dg-node": "div 150x50; with data | prog | fixed",
+    "dg-svg": "svg overlay 1280x720; paths .link | .pass | .route",
+    "dg-pass-label": "red mono caps label",
+    "dg-caption": "grey mono caption",
+    "dg-heading": "Poppins 26 heading",
+    "dg-tile": "image or canvas tile; .dg-tile-label inside",
+    "dg-screen-tri": "screen as two triangles"
+  },
+  "rules": { "red": "programmable stages or the point of the slide only", "links": "animate with data-anim=draw" },
+  "example": "diagram"
+}

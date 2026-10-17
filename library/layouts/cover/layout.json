@@ -1,0 +1,35 @@
+{
+  "id": "cover",
+  "kind": "layout",
+  "use": "First slide of a talk",
+  "avoid": "Any slide with content: use list or canvas",
+  "body": "sa-cover",
+  "slots": {
+    "photo": {
+      "class": "sa-cover-photo",
+      "required": true,
+      "notes": "img, full bleed, shown at 20 %, same image on every cover-ground slide"
+    },
+    "monogram": {
+      "class": "sa-monogram",
+      "required": true,
+      "notes": "img /public/assets/brand/monogram.webp"
+    },
+    "wordmark": {
+      "class": "sa-wordmark",
+      "required": true,
+      "notes": "img /public/assets/brand/wordmark-white.webp"
+    },
+    "title": {
+      "class": "sa-cover-title",
+      "required": true,
+      "maxChars": 50,
+      "case": "sentence, names and terms keep their form"
+    }
+  },
+  "components": [
+    "monogram",
+    "anim"
+  ],
+  "example": "cover"
+}

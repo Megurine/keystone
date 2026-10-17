@@ -1,0 +1,16 @@
+<header class="sa-head"><img class="sa-logo" src="/public/assets/brand/sa-monogram-white.svg" alt=""><h1 class="sa-band">CHAPITRE</h1></header>
+<script src="/public/components/anim.js"></script>
+<link rel="stylesheet" href="/public/components/diagram.css">
+<h2 class="sa-title" data-in="100">Un pipeline en trois étapes</h2>
+<p class="sa-lead" data-in="200">Les données passent par une étape <b>fixe</b> puis une étape <span>programmable</span>.</p>
+<svg class="dg-svg" viewBox="0 0 1280 720">
+  <path class="link" d="M273,385 H403" pathLength="1" stroke-dasharray="1" data-in="600" data-anim="draw"/>
+  <path class="link" d="M553,385 H683" pathLength="1" stroke-dasharray="1" data-in="900" data-anim="draw"/>
+  <path class="pass" d="M403,450 H833" data-in="1200" data-anim="wipe"/>
+</svg>
+<div class="dg-node data" style="left:123px;top:360px" data-in="400">Vertices</div>
+<div class="dg-node fixed" style="left:403px;top:360px" data-in="700">Rasterizer</div>
+<div class="dg-node prog" style="left:683px;top:360px" data-in="1000">Pixel shader</div>
+<span class="dg-pass-label" style="left:403px;top:470px" data-in="1200">Une passe</span>
+<span class="dg-caption" style="left:123px;top:422px" data-in="400">données</span>
+<p class="sa-takeaway" data-in="1500">À retenir&nbsp;: <span>le rouge marque ce que l'on programme.</span></p>

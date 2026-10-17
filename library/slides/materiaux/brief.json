@@ -1,0 +1,7 @@
+{
+  "title": "Composant three : matériaux glTF",
+  "text": "Exemple de la bibliothèque de styles : les extensions KHR_materials_* (dispersion, clearcoat, iridescence, sheen, anisotropy), avec des réglages en direct sur la sphère en verre. Voir library/components/three/.",
+  "prompt": "",
+  "notes": "",
+  "status": "done"
+}

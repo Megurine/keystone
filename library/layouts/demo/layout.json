@@ -1,0 +1,41 @@
+{
+  "id": "demo",
+  "kind": "layout",
+  "use": "Break before a live demo",
+  "avoid": "Chapter openers: use chapter",
+  "body": "sa-cover",
+  "slots": {
+    "photo": {
+      "class": "sa-cover-photo",
+      "required": true
+    },
+    "monogram": {
+      "class": "sa-monogram",
+      "required": true
+    },
+    "wordmark": {
+      "class": "sa-wordmark",
+      "required": true
+    },
+    "title": {
+      "class": "sa-cover-title sa-section-title",
+      "required": true,
+      "notes": "DÉMO"
+    },
+    "subtitle": {
+      "class": "sa-section-sub",
+      "required": true,
+      "maxChars": 40
+    },
+    "icons": {
+      "class": "(slide-local)",
+      "required": false,
+      "notes": "row between y 160 and 300"
+    }
+  },
+  "components": [
+    "monogram",
+    "anim"
+  ],
+  "example": "demo"
+}

@@ -1,0 +1,29 @@
+{
+  "id": "closing",
+  "kind": "layout",
+  "use": "Last slide: thanks, recap or contact",
+  "avoid": "New content",
+  "body": "sa-cover",
+  "slots": {
+    "title": {
+      "class": "sa-cover-title sa-section-title is-high",
+      "required": true,
+      "notes": "MERCI&nbsp;!"
+    },
+    "recap": {
+      "class": "sa-closing",
+      "required": false,
+      "notes": "p label + ul, 3–5 items"
+    },
+    "qr": {
+      "class": "sa-qr",
+      "required": false,
+      "notes": "img inside; then p.sa-section-sub with <small>"
+    }
+  },
+  "components": [
+    "monogram",
+    "anim"
+  ],
+  "example": "closing"
+}

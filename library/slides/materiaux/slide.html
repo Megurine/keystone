@@ -1,0 +1,86 @@
+<header class="sa-head"><img class="sa-logo" src="/public/assets/brand/sa-monogram-white.svg" alt=""><h1 class="sa-band">RENDU 3D</h1></header>
+<script src="/public/components/anim.js"></script>
+<h2 class="sa-title" data-in="100">Matériaux glTF dans Keystone</h2>
+
+<canvas class="gm-view" id="gm-view" data-in="200" data-anim="fade"></canvas>
+
+<div class="gm-sliders" data-in="900">
+  <label><span>ior</span><input type="range" data-k="ior" min="1" max="2.333" step="0.01" value="1.03"><output></output></label>
+  <label><span>thickness</span><input type="range" data-k="thickness" min="0" max="4" step="0.05" value="2.2"><output></output></label>
+  <label><span>dispersion</span><input type="range" data-k="dispersion" min="0" max="10" step="0.1" value="10"><output></output></label>
+</div>
+
+<div class="gm-caps">
+  <p data-in="400">Dispersion<small>KHR_materials_dispersion</small></p>
+  <p data-in="500">Vernis<small>KHR_materials_clearcoat</small></p>
+  <p data-in="600">Irisation<small>KHR_materials_iridescence</small></p>
+  <p data-in="700">Velours<small>KHR_materials_sheen</small></p>
+  <p data-in="800">Métal brossé<small>KHR_materials_anisotropy</small></p>
+</div>
+
+<p class="sa-takeaway" data-in="1000">Exportés depuis Blender, lus tels quels par GLTFLoader&nbsp;: <span>aucun code en plus</span>.</p>
+
+<style>
+  .gm-view { position: absolute; left: 73px; top: 140px; width: 1134px; height: 340px; }
+  .gm-caps { position: absolute; left: 73px; top: 488px; width: 1134px; display: grid; grid-template-columns: repeat(5, 1fr); }
+  .gm-caps p { margin: 0; text-align: center; font: 500 22px/1.2 var(--display); color: var(--white); }
+  .gm-caps small { display: block; margin-top: 8px; font: 11px/1 var(--mono); letter-spacing: .06em; color: var(--gray); }
+  .gm-sliders { position: absolute; left: 88px; top: 384px; width: 220px; padding: 4px 10px; background: var(--ink-2); border: 1px solid var(--rule); }
+  .gm-sliders label { display: flex; align-items: center; gap: 8px; height: 26px; font: 11px/1 var(--mono); color: var(--gray); }
+  .gm-sliders span { width: 72px; }
+  .gm-sliders input { flex: 1; min-width: 0; accent-color: var(--red); }
+  .gm-sliders output { width: 34px; text-align: right; color: var(--white); }
+</style>
+
+<script type="module">
+import { THREE, stage, playLoop } from "/public/components/stage.js";
+import { backdrop } from "/public/components/backdrop.js";
+
+const W = 1134, H = 340;
+const camera = new THREE.PerspectiveCamera(16, W / H, 0.1, 80);
+camera.position.set(0, 0, 30);
+const { render, scene } = stage(document.getElementById("gm-view"), W, H, { look: "pbr", env: "studio", clear: null, ao: false, draw: () => render(camera) });
+
+// Ground with a grid (--ink, --rule-2): something for the glass to bend.
+backdrop(scene, camera, (ctx, w, h) => {
+  ctx.fillStyle = "#1b1b1c"; ctx.fillRect(0, 0, w, h);
+  ctx.strokeStyle = "#4a4a4b"; ctx.lineWidth = 2;
+  const step = w / 48;
+  for (let x = step / 2; x < w; x += step) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke(); }
+  for (let y = (h / 2) % step; y < h; y += step) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); }
+});
+
+const P = p => new THREE.MeshPhysicalMaterial(p);
+const mats = [
+  P({ color: "#ffffff", transmission: 1, roughness: 0, ior: 1.03, thickness: 2.2, dispersion: 10 }),
+  P({ color: "#ee342c", metalness: 0.3, roughness: 0.55, clearcoat: 1, clearcoatRoughness: 0.03 }),
+  P({ color: "#bbbbbb", metalness: 1, roughness: 0.2, iridescence: 1, iridescenceIOR: 1.3, iridescenceThicknessRange: [100, 600] }),
+  P({ color: "#3a0d1a", roughness: 0.9, sheen: 1, sheenColor: "#ff6fa8", sheenRoughness: 0.35 }),
+  P({ color: "#8a8a8c", metalness: 1, roughness: 0.45, anisotropy: 1 }),
+];
+// Five columns, like the captions: column centres at 10 %, 30 % … 90 % of the canvas width.
+const viewW = 2 * camera.position.z * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * camera.aspect;
+const geo = new THREE.SphereGeometry(1.55, 96, 48);
+const balls = mats.map((m, i) => { const b = new THREE.Mesh(geo, m); b.position.x = (i / 5 + 0.1 - 0.5) * viewW; scene.add(b); return b; });
+
+// The environment follows the camera (stage.js): turn it slowly on top of that, so the reflections move over the spheres.
+let spin = 0;
+const follow = scene.onBeforeRender;
+scene.onBeforeRender = (...a) => { follow(...a); scene.environmentRotation.y += spin; };
+
+// Sliders: refraction (ior, thickness) and dispersion of the glass ball, live.
+for (const input of document.querySelectorAll(".gm-sliders input")) {
+  const out = input.nextElementSibling, set = () => { mats[0][input.dataset.k] = +input.value; out.value = (+input.value).toFixed(2); };
+  set();
+  input.addEventListener("input", () => { set(); render(camera); });
+  input.addEventListener("keydown", e => e.stopPropagation());   // arrow keys move the slider, not the slides
+}
+
+function frame(t) {
+  spin = t * 0.00025;
+  balls[4].rotation.z = t * 0.0003;                  // the brushed direction turns
+  render(camera);
+}
+frame(0);
+playLoop(frame);
+</script>

@@ -1,0 +1,7 @@
+/* B · Éditorial — no band: chapter as a red mono eyebrow, slide topic as a big white title with a short red rule. */
+.sa-head { top: 58px; left: 73px; gap: 12px; }
+.sa-head .sa-logo { width: 26px; height: 26px; margin: 0; }
+.sa-band { min-width: 0; height: auto; padding: 0; background: none; box-shadow: none;
+  font: 500 15px/1 var(--mono); letter-spacing: .16em; color: var(--red); }
+.sa-sub, .pl-sub, .in-sub, .lod-sub, .nc-sub, .nl-sub { left: 73px; top: 94px; font: 800 44px/1 var(--display); letter-spacing: -.01em; }
+.sa-sub::after, .pl-sub::after, .in-sub::after, .lod-sub::after, .nc-sub::after, .nl-sub::after { content: ""; display: block; width: 64px; height: 5px; margin-top: 16px; background: var(--red); }

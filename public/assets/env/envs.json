@@ -1,0 +1,6 @@
+{
+  "studio": { "source": "Poly Haven \"studio_small_09\" (CC0), tools/env.py", "yaw": 142.6, "pitch": 0, "exposure": 1,
+              "sun": { "dir": [0.038, 0.5533, -0.8321], "color": [1, 0.9939, 0.9964], "intensity": 1.121 } },
+  "exterior": { "source": "Poly Haven \"kloofendal_48d_partly_cloudy\" (CC0), tools/env.py", "yaw": 13.4, "pitch": 0, "exposure": 1,
+                "sun": { "dir": [0.5435, 0.7417, 0.3931], "color": [0.9911, 1, 0.9119], "intensity": 4.404 } }
+}

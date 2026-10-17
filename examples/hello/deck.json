@@ -1,0 +1,25 @@
+{
+  "title": "Bonjour Keystone",
+  "titleEn": "Hello Keystone",
+  "order": [
+    "cover",
+    "premiere"
+  ],
+  "publish": {
+    "slug": "hello",
+    "title": "Hello Keystone",
+    "description": "The Keystone example deck.",
+    "author": "",
+    "event": "",
+    "date": "",
+    "sourceLang": "fr",
+    "languages": [
+      "en",
+      "fr"
+    ],
+    "first": "",
+    "skip": [],
+    "cover": "cover",
+    "requires": ""
+  }
+}

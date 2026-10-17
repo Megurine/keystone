@@ -1,0 +1,14 @@
+{
+  "id": "monogram",
+  "kind": "component",
+  "use": "Giant monogram on cover-ground slides",
+  "include": [],
+  "classes": {
+    "sa-monogram": "img /public/assets/brand/monogram.webp",
+    "is-faint": "10 % watermark"
+  },
+  "rules": {
+    "file": "/public/assets/brand/monogram.webp"
+  },
+  "example": "cover"
+}

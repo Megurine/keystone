@@ -1,0 +1,1500 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Keystone</title>
+<link rel="stylesheet" href="/public/theme.css">
+<style>
+  :root {
+    --ui-bg: #0d0d0e;
+    --ui-panel: #161617;
+    --ui-field: #1f1f20;
+    --ui-line: #2e2e30;
+    --ui-fg: #f1f1f1;
+    --ui-muted: #8d8d92;
+    --ui-ok: #5bc28a;
+    --ui-warn: #e8a33d;
+  }
+  html, body { height: 100%; }
+  body { margin: 0; background: var(--ui-bg); color: var(--ui-fg); font: 14px/1.4 var(--body); overflow: hidden; }
+  button { font: inherit; color: inherit; }
+
+  .app { display: grid; grid-template-columns: 1fr auto; height: 100%; }
+  .stage { position: relative; overflow: hidden; }
+  .frame { position: absolute; width: 1280px; height: 720px; border: 0; transform-origin: 0 0; background: var(--ink); visibility: hidden; }
+  .frame.on { visibility: visible; }
+
+  /* Bottom bar, fades when the mouse is idle, unless the mouse is on it */
+  .bar { position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%); display: flex; align-items: center; gap: 4px;
+         background: rgb(22 22 23 / .9); border: 1px solid var(--ui-line); padding: 4px; backdrop-filter: blur(8px); transition: opacity .3s; z-index: 10; }
+  body.idle .bar:not(:hover) { opacity: 0; pointer-events: none; } /* it stays while the mouse rests on it */
+  .bar button { background: none; border: 0; padding: 7px 11px; cursor: pointer; font: 500 12px/1 var(--mono); white-space: nowrap; }
+  .bar button:hover, .bar button:focus-visible { background: var(--ui-field); outline: none; }
+  .bar .count { font: 500 12px/1 var(--mono); color: var(--ui-muted); padding: 0 10px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .bar .sep { width: 1px; height: 18px; background: var(--ui-line); }
+  kbd { font: inherit; color: var(--ui-muted); margin-left: 6px; }
+
+  /* Editor drawer */
+  .editor { width: 400px; background: var(--ui-panel); border-left: 1px solid var(--ui-line); display: flex; flex-direction: column; min-height: 0; }
+  .editor[hidden] { display: none; }
+  .ed-head { padding: 16px 18px 12px; border-bottom: 1px solid var(--ui-line); display: grid; gap: 8px; }
+  .ed-head .row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .ed-id { font: 500 12px/1 var(--mono); color: var(--ui-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .pill { font: 500 11px/1 var(--mono); text-transform: uppercase; letter-spacing: .06em; padding: 5px 8px; white-space: nowrap; }
+  .pill.todo { background: rgb(238 52 44 / .16); color: var(--red); }
+  .pill.done { background: rgb(91 194 138 / .14); color: var(--ui-ok); }
+  .ed-body { padding: 14px 18px; display: grid; gap: 14px; overflow: auto; flex: 1; align-content: start; }
+  .field { display: grid; gap: 6px; }
+  .field label { font: 500 11px/1 var(--mono); text-transform: uppercase; letter-spacing: .08em; color: var(--ui-muted); }
+  .field .hint { font-size: 12px; color: var(--ui-muted); }
+  input, textarea { width: 100%; background: var(--ui-field); border: 1px solid var(--ui-line); color: var(--ui-fg); padding: 9px 10px; font: 14px/1.45 var(--body); resize: vertical; }
+  textarea { min-height: 110px; }
+  #f-note { border-color: rgb(238 52 44 / .45); }
+  .field .send { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  body.recording #b-talk { border-color: var(--red); color: var(--red); }
+  input:focus, textarea:focus { outline: none; border-color: var(--red); }
+  .ed-foot { padding: 12px 18px 16px; border-top: 1px solid var(--ui-line); display: grid; gap: 8px; }
+  .ed-foot .row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .btn { background: var(--ui-field); border: 1px solid var(--ui-line); padding: 8px 12px; cursor: pointer; }
+  .btn:hover, .btn:focus-visible { border-color: var(--ui-muted); outline: none; }
+  .btn.primary { background: var(--red); border-color: var(--red); color: #fff; font-weight: 600; }
+  .btn.danger.armed { background: #7a1f18; border-color: #c0392b; }
+  .btn:disabled { opacity: .5; cursor: default; }
+  .saved { font: 500 12px var(--mono); color: var(--ui-muted); min-height: 1em; }
+
+  /* Fact-check bubbles: shown over the slide while the editor is open */
+  .checks { position: absolute; inset: 0; pointer-events: none; z-index: 5; }
+  body:not(.editing) .checks { display: none; }
+  .ck-dot { position: absolute; width: 22px; height: 22px; margin: -11px 0 0 4px; border-radius: 50%; border: 2px solid var(--ui-bg);
+            display: grid; place-items: center; font: 700 12px/1 var(--mono); color: var(--ui-bg); cursor: pointer; pointer-events: auto;
+            box-shadow: 0 2px 8px rgb(0 0 0 / .5); padding: 0; transition: transform .12s; }
+  .ck-dot:hover, .ck-dot:focus-visible, .ck-dot.open { transform: scale(1.2); outline: none; }
+  .ck-dot.ok { background: var(--ui-ok); } .ck-dot.nuance { background: var(--ui-warn); } .ck-dot.faux { background: var(--red); color: #fff; }
+  .ck-dot.todo::after { content: ""; position: absolute; inset: -6px; border-radius: 50%; border: 2px dashed var(--ui-fg); animation: ck-spin 4s linear infinite; }
+  .ck-dot.unplaced { opacity: .85; }
+  @keyframes ck-spin { to { transform: rotate(1turn); } }
+  @media (prefers-reduced-motion: reduce) { .ck-dot.todo::after { animation: none; } }
+
+  .ck-card { position: absolute; width: 340px; max-height: calc(100% - 24px); overflow: auto; pointer-events: auto; background: var(--ui-panel);
+             border: 1px solid var(--ui-line); border-top: 3px solid var(--v); box-shadow: 0 12px 32px rgb(0 0 0 / .55); display: grid; }
+  .ck-card.ok { --v: var(--ui-ok); } .ck-card.nuance { --v: var(--ui-warn); } .ck-card.faux { --v: var(--red); }
+  .ck-bubble { padding: 12px 14px; display: grid; gap: 8px; }
+  .ck-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .ck-verdict { font: 500 11px/1 var(--mono); text-transform: uppercase; letter-spacing: .08em; color: var(--v); }
+  .ck-close { background: none; border: 0; color: var(--ui-muted); cursor: pointer; font-size: 16px; line-height: 1; padding: 2px 4px; }
+  .ck-close:hover, .ck-close:focus-visible { color: var(--ui-fg); outline: none; }
+  .ck-claim { margin: 0; font-size: 13px; color: var(--ui-muted); border-left: 2px solid var(--ui-line); padding-left: 8px; }
+  .ck-note { margin: 0; font-size: 14px; line-height: 1.5; }
+  .ck-src { font: 500 11px/1.4 var(--mono); color: var(--ui-muted); }
+  .ck-src a { color: inherit; }
+  .ck-thread { display: grid; gap: 8px; padding: 0 14px 4px; }
+  .ck-msg { font-size: 13px; line-height: 1.45; padding: 8px 10px; background: var(--ui-field); white-space: pre-wrap; }
+  .ck-msg b { display: block; font: 500 10px/1 var(--mono); text-transform: uppercase; letter-spacing: .08em; color: var(--ui-muted); margin-bottom: 4px; }
+  .ck-msg.claude { border-left: 2px solid var(--v); }
+  .ck-reply { padding: 10px 14px 14px; display: grid; gap: 8px; border-top: 1px solid var(--ui-line); }
+  .ck-reply label { font: 500 11px/1 var(--mono); text-transform: uppercase; letter-spacing: .08em; color: var(--ui-muted); }
+  .ck-reply textarea { min-height: 72px; font-size: 13px; }
+  .ck-reply .row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .ck-hint { font: 500 11px var(--mono); color: var(--ui-muted); }
+  .ck-sum { font: 500 12px/1.3 var(--mono); color: var(--ui-muted); }
+
+  /* Feedback recording (key R): strokes drawn over the slide while the microphone records */
+  .fb { position: absolute; z-index: 6; cursor: crosshair; touch-action: none; }
+  .fb[hidden] { display: none; }
+  .fb polyline { fill: none; stroke: var(--red); stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+  /* While recording the bar goes to the top right corner with only the slide keys and the stop button: the whole
+     slide stays free to draw on */
+  body.recording .bar { left: auto; right: 14px; bottom: auto; top: 14px; transform: none; opacity: 1; pointer-events: auto; }
+  body.recording .bar > :not(#b-prev, #count, #b-next, #b-new, #b-fb, #fb-level, #b-dsl) { display: none; }
+  body:not(.recording) #b-new { display: none; } /* while recording only: a stray key or click must not add a slide during a talk */
+  body.recording #b-fb { color: var(--red); }
+  /* Microphone level: the user sees that the voice is recorded */
+  .fb-level { width: 44px; height: 6px; margin: 0 8px; background: var(--ui-field); }
+  body:not(.recording) .fb-level { display: none; }
+  .fb-level i { display: block; height: 100%; width: 0; background: var(--ui-ok); }
+
+  /* Tasks panel (key T), top right (slide titles are on the left): Claude's tasks in three groups, questions first.
+     One short row per task; a click goes to its slide and opens its pin, where the detail is. Updated in place,
+     the page never reloads. */
+  .fbp { position: absolute; right: 14px; top: 14px; width: 300px; max-height: calc(100% - 28px); overflow: auto; z-index: 8;
+         background: rgb(22 22 23 / .94); border: 1px solid var(--ui-line); backdrop-filter: blur(8px); padding-bottom: 6px; }
+  .fbp[hidden], body.recording .fbp { display: none; }
+  .fbp-head, .fbp-group { display: flex; align-items: center; gap: 8px; font: 500 11px/1 var(--mono); text-transform: uppercase; letter-spacing: .08em; color: var(--ui-muted); }
+  .fbp-head { padding: 9px 6px 9px 12px; border-bottom: 1px solid var(--ui-line); }
+  .fbp-head span, .fbp-group span { flex: 1; }
+  .fbp-group { padding: 12px 6px 4px 12px; }
+  .fbp-group.Ask { color: var(--ui-warn); }
+  summary.fbp-group { cursor: pointer; list-style: none; } summary.fbp-group::-webkit-details-marker { display: none; }
+  summary.fbp-group span::after { content: " ▸"; } details[open] > summary.fbp-group span::after { content: " ▾"; }
+  .fbp button { background: none; border: 0; cursor: pointer; }
+  .fbp-link { padding: 3px 4px; font: 500 11px/1 var(--mono); text-transform: uppercase; letter-spacing: .06em; color: var(--ui-muted); white-space: nowrap; }
+  .fbp-link:hover, .fbp-link:focus-visible, .fbp-x:hover, .fbp-x:focus-visible { color: var(--ui-fg); outline: none; }
+  .fbp-link.on { color: var(--ui-ok); }
+  .fbp-task { display: grid; grid-template-columns: 1fr auto; align-items: start; border-left: 2px solid var(--c, var(--ui-line)); margin: 2px 0 2px 12px; }
+  .fbp-task.Ask { --c: var(--ui-warn); } .fbp-task.Doing { --c: var(--ui-warn); } .fbp-task.Todo { --c: var(--red); } .fbp-task.Done { --c: var(--ui-ok); } .fbp-task.Stopped { --c: var(--ui-muted); }
+  .fbp-link.stop { color: var(--red); }
+  .fbp-go { display: grid; gap: 2px; padding: 4px 4px 4px 9px; text-align: left; min-width: 0; }
+  .fbp-go:hover, .fbp-go:focus-visible { background: var(--ui-field); outline: none; }
+  .fbp-go small { font: 500 11px/1.3 var(--mono); color: var(--ui-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .fbp-task.here .fbp-go small { color: var(--ui-fg); }
+  .fbp-go span { font-size: 13px; line-height: 1.35; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+  .fbp-task.Done .fbp-go span { -webkit-line-clamp: 1; color: var(--ui-muted); }
+  .fbp-x { padding: 4px 8px; color: var(--ui-muted); font-size: 15px; line-height: 1; opacity: .5; }
+  .fbp-task:hover .fbp-x, .fbp-x:focus-visible { opacity: 1; }
+  .fbp-note { padding: 4px 12px; font-size: 12px; line-height: 1.4; color: var(--ui-muted); }
+  .fbp-note.error { color: var(--red); }
+
+  /* DSL view (key D), bottom right: the feedback language as it is written, live while recording (the part in
+     progress, then the saved file with what was heard, then Claude's tasks). Each type's signature is shown once. */
+  .dsl { --t: #4dabf7; --v: #74c0fc; --e: #e599f7; --s: #8ce99a; --n: #ffd43b;
+         position: absolute; right: 14px; bottom: 14px; width: 460px; max-height: 58%; overflow: auto; z-index: 8; margin: 0; padding: 10px 12px;
+         background: rgb(13 13 14 / .88); border: 1px solid var(--ui-line); backdrop-filter: blur(8px); font: 11px/1.55 var(--mono); color: var(--ui-fg); }
+  .dsl[hidden] { display: none; }
+  body.recording .dsl { pointer-events: none; } /* strokes go through it */
+  body.dsl-on .fbp { max-height: calc(42% - 28px); }
+  .dsl div { white-space: pre-wrap; overflow-wrap: anywhere; padding-left: 2ch; text-indent: -2ch; }
+  .dsl .c { color: var(--ui-muted); } .dsl .sig { color: var(--ui-muted); margin-top: 5px; }
+  .dsl .st { color: var(--t); font-weight: 700; } .dsl .vt { color: var(--v); } .dsl .en { color: var(--e); }
+  .dsl .s { color: var(--s); } .dsl .n { color: var(--n); } .dsl .nm { color: var(--ui-muted); }
+  .dsl .new { animation: dsl-new .9s ease-out; }
+  @keyframes dsl-new { from { background: rgb(77 171 247 / .28); } }
+
+  /* Pins: one per task, on its slide, shown while the panel is open or a feedback is recorded. A pin looks like a
+     fact-check dot; its card shows the task, what was heard and the strokes drawn then. */
+  .pins { position: absolute; inset: 0; pointer-events: none; z-index: 7; }
+  .fb-show { position: absolute; z-index: 5; pointer-events: none; }
+  .fb-show polyline { fill: none; stroke: var(--red); stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+  body:not(.tasks):not(.recording) .pins, body:not(.tasks) .fb-show { display: none; }
+  .fb-pin { margin: -11px 0 0 -11px; background: var(--ui-muted); }
+  .fb-pin.Todo { background: var(--red); color: #fff; }
+  .fb-pin.Doing, .fb-pin.Ask { background: var(--ui-warn); }
+  .fb-pin.Ask { width: 26px; height: 26px; margin: -13px 0 0 -13px; font-size: 15px; }
+  .fb-pin.Done { background: var(--ui-ok); }
+  body.recording .fb-pin { pointer-events: none; opacity: .55; } /* seen while drawing, never in the way of a stroke */
+  .fb-card.Stopped { --v: var(--ui-muted); } .fb-card.Todo { --v: var(--red); } .fb-card.Doing, .fb-card.Ask { --v: var(--ui-warn); } .fb-card.Done { --v: var(--ui-ok); }
+  .fb-card .row { justify-content: flex-end; }
+  .fb-card .btn { padding: 7px 9px; font-size: 13px; white-space: nowrap; }
+
+  /* Claude at work (bottom left): Clawd plays one animation per stage (listening, writing down, reading, looking,
+     making tasks, working, checking, done, error, question) next to one line on what happens now and the task in
+     progress. It pops at each new stage. Never in the way of a click or a stroke.
+     Animations: public/assets/clawd/<stage>.gif, 302×300 with the drawing inside (50,103)–(247,277): shown at 210 px
+     and shifted, so Clawd stands on the card's bottom edge and its screen, hat or bulb rise above the card.
+     They are not in git (see CLAUDE.md); without them, a plain mascot. */
+  .claude-at { position: absolute; left: 14px; bottom: 14px; z-index: 9; display: flex; align-items: center; gap: 4px; max-width: min(640px, calc(100% - 28px));
+               padding-right: 52px; background: rgb(22 22 23 / .94); border: 1px solid var(--ui-line); backdrop-filter: blur(8px);
+               pointer-events: none; animation: ca-in .45s cubic-bezier(.34, 1.56, .64, 1); }
+  .claude-at[hidden] { display: none; }
+  .claude-at.out { animation: ca-out .3s ease-in forwards; }
+  .ca-clawd { position: relative; flex: none; width: 138px; height: 74px; transform-origin: 50% 100%; transition: transform .08s; }
+  .claude-at.listening .ca-clawd { transform: scale(calc(1 + var(--level, 0) * .22)); } /* it swells with the voice */
+  .ca-clawd img { position: absolute; left: -36px; bottom: -11px; width: 210px; max-width: none; transform-origin: 50% 92%; }
+  .ca-clawd svg { position: absolute; left: 36px; bottom: 8px; width: 66px; height: 48px; display: none; }
+  .claude-at.plain img { display: none; } .claude-at.plain svg { display: block; }
+  .ca-clawd.pop img, .ca-clawd.pop svg { animation: ca-pop .5s cubic-bezier(.34, 1.56, .64, 1); }
+  .ca-say { display: grid; gap: 3px; min-width: 0; padding: 10px 0; }
+  .ca-say.line { animation: ca-line .28s ease-out; }
+  .ca-say b, .ca-say i { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ca-say b { font: 500 13px/1.25 var(--mono); }
+  .ca-say i { font: 13px/1.3 var(--body); color: var(--ui-muted); }
+  .ca-say i:empty { display: none; }
+  .claude-at.done .ca-say b, .claude-at.error .ca-say b, .claude-at.ask .ca-say b { font: 14px/1.4 var(--body); white-space: normal; }
+  .claude-at.listening .ca-say i { white-space: normal; } /* the question being answered, in full */
+  .claude-at.error { border-color: var(--red); }
+  /* The cross closes the popup until the next recording or the next run; the bar shrinks while the last message
+     stays (12 s, a question or an error 30 s) */
+  .ca-close { position: absolute; right: 2px; top: 1px; pointer-events: auto; background: none; border: 0; padding: 3px 6px; cursor: pointer; color: var(--ui-muted); font-size: 16px; line-height: 1; }
+  .ca-close:hover, .ca-close:focus-visible, .ca-more:hover, .ca-more:focus-visible { color: var(--ui-fg); outline: none; }
+  /* The run in detail (▴): lines added and removed per file, then the log: what Claude says, its steps, its thinking */
+  .ca-more { position: absolute; right: 24px; top: 2px; pointer-events: auto; background: none; border: 0; padding: 3px 6px; cursor: pointer; color: var(--ui-muted); font-size: 13px; line-height: 1; }
+  .ca-stop { flex: none; pointer-events: auto; margin-left: 8px; padding: 6px 10px; cursor: pointer; background: none; border: 1px solid var(--red); color: var(--red); font: 500 12px/1 var(--mono); }
+  .ca-stop:hover, .ca-stop:focus-visible { background: var(--red); color: #fff; outline: none; }
+  .ca-stop[hidden], .ca-link[hidden] { display: none; }
+  .ca-link { flex: none; pointer-events: auto; margin-left: 8px; padding: 6px 10px; cursor: pointer; background: none; border: 1px solid var(--ui-line); color: var(--ui-fg); font: 500 12px/1 var(--mono); white-space: nowrap; }
+  .ca-link:hover, .ca-link:focus-visible { border-color: var(--ui-muted); outline: none; }
+  .ca-diff { flex: none; font: 500 12px/1 var(--mono); white-space: nowrap; margin-left: 6px; }
+  .ca-diff:empty { display: none; }
+  .ca-add { color: var(--ui-ok); } .ca-del { color: var(--red); }
+  .ca-detail { position: absolute; left: 146px; bottom: calc(100% + 6px); width: min(560px, calc(100vw - 174px)); /* right of Clawd: its screen and hat stay in view */ max-height: 52vh; overflow: auto; pointer-events: auto;
+               background: rgb(22 22 23 / .96); border: 1px solid var(--ui-line); backdrop-filter: blur(8px); padding: 8px 12px 10px; display: grid; gap: 3px; font-size: 13px; line-height: 1.45; }
+  .ca-detail[hidden] { display: none; }
+  .ca-detail div { display: grid; grid-template-columns: 38px 1fr; gap: 8px; }
+  .ca-detail time, .ca-detail .step, .ca-detail .file { font: 500 11px/1.6 var(--mono); color: var(--ui-muted); }
+  .ca-detail .file { grid-template-columns: 1fr auto; }
+  .ca-detail .think span { color: var(--ui-muted); font-style: italic; }
+  .ca-detail .pass { margin-top: 5px; padding-top: 5px; border-top: 1px solid var(--ui-line); }
+  .ca-detail .pass span { font: 500 11px/1.6 var(--mono); text-transform: uppercase; letter-spacing: .08em; color: var(--ui-warn); }
+  .ca-timer { position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: var(--ui-muted); transform-origin: 0 50%; display: none; }
+  .claude-at.error .ca-timer { background: var(--red); }
+  .ca-timer.on { display: block; animation: ca-timer var(--t) linear forwards; }
+  @keyframes ca-timer { to { transform: scaleX(0); } }
+  /* Done: a burst of pixels above Clawd */
+  .ca-burst { position: absolute; left: 50%; top: 10%; }
+  .ca-burst i { position: absolute; width: 6px; height: 6px; background: var(--c); opacity: 0; }
+  .claude-at.done .ca-burst i { animation: ca-burst .9s cubic-bezier(.2, .7, .3, 1) both; }
+  .ca-clawd .ca-a { animation: ca-legs .6s steps(1) infinite; } .ca-clawd .ca-b { animation: ca-legs .6s steps(1) -.3s infinite; }
+  @keyframes ca-in { from { transform: translateY(24px); opacity: 0; } }
+  @keyframes ca-out { to { transform: translateY(18px); opacity: 0; } }
+  @keyframes ca-pop { 0% { transform: scale(.5, .3); } 55% { transform: scale(1.14, .92); } 78% { transform: scale(.96, 1.05); } }
+  @keyframes ca-line { from { transform: translateY(7px); opacity: .2; } }
+  @keyframes ca-burst { 0% { transform: none; opacity: 1; } 70% { opacity: 1; } 100% { transform: translate(var(--x), var(--y)) rotate(180deg); opacity: 0; } }
+  @keyframes ca-legs { 0% { opacity: 1; } 50%, 100% { opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { .claude-at, .claude-at :not(.ca-timer), .claude-at.listening .ca-clawd { animation: none !important; transform: none !important; } .ca-clawd .ca-b, .ca-burst { display: none; } }
+
+  /* Overview */
+  .overview { position: fixed; inset: 0; background: rgb(8 8 9 / .96); z-index: 20; overflow: auto; padding: 28px; }
+  .overview[hidden] { display: none; }
+  .ov-decks { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 22px; }
+  .ov-decks[hidden] { display: none; }
+  .ov-decks a, .ov-decks button { padding: 8px 12px; border: 1px solid var(--ui-line); color: var(--ui-muted); text-decoration: none; font: 500 12px/1 var(--mono); background: none; cursor: pointer; }
+  .ov-decks button { border-style: dashed; }
+  .ov-decks a:hover, .ov-decks a:focus-visible, .ov-decks button:hover, .ov-decks button:focus-visible { color: var(--ui-fg); border-color: var(--ui-muted); outline: none; }
+  .ov-decks a.on { color: var(--ui-fg); border-color: var(--red); }
+  /* Where Claude works: a moving frame around the slide it is on (the stage), and the same colour on its thumbnail
+     in the overview */
+  .cw { position: absolute; z-index: 4; pointer-events: none; outline: 3px solid var(--ui-warn); outline-offset: -3px; animation: cw-pulse 1.2s ease-in-out infinite; }
+  .cw[hidden] { display: none; }
+  .cw span { position: absolute; left: 50%; top: 10px; transform: translateX(-50%); padding: 5px 9px; background: var(--ui-warn); color: var(--ui-bg); font: 700 11px/1 var(--mono); text-transform: uppercase; letter-spacing: .08em; white-space: nowrap; }
+  @keyframes cw-pulse { 50% { outline-color: rgb(232 163 61 / .25); } }
+  .thumb.claude { border-color: var(--ui-warn); animation: cw-thumb 1.2s ease-in-out infinite; }
+  .thumb.claude::after { content: "Claude works here"; position: absolute; right: 6px; top: 6px; padding: 4px 6px; background: var(--ui-warn); color: var(--ui-bg); font: 700 10px/1 var(--mono); text-transform: uppercase; letter-spacing: .06em; }
+  @keyframes cw-thumb { 50% { border-color: rgb(232 163 61 / .3); } }
+  @media (prefers-reduced-motion: reduce) { .cw, .thumb.claude { animation: none; } }
+
+  /* The review: what Claude changed since the user last looked. Slides on the left when there are several; each
+     slide in one large view, as it is now or as it was (two buttons, or Space); then the changed lines of its files. */
+  .rv { width: min(1240px, calc(100vw - 32px)); max-height: calc(100vh - 32px); padding: 0; border: 1px solid var(--ui-line); background: var(--ui-panel); color: var(--ui-fg); overflow: hidden; }
+  .rv[open] { display: grid; grid-template-rows: auto 1fr; grid-template-columns: minmax(0, 1fr); } /* minmax(0, …): a long line of code must not widen the dialog and push its buttons out of view */
+  .rv::backdrop { background: rgb(8 8 9 / .78); }
+  .rv-head { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--ui-line); }
+  .rv-head b { font: 600 15px/1.2 var(--body); flex: 1; }
+  .rv-main { display: flex; min-height: 0; } /* one slide: no list, the view takes the whole width */
+  .rv-list { display: grid; align-content: start; gap: 2px; padding: 10px; border-right: 1px solid var(--ui-line); overflow: auto; width: 230px; flex: none; }
+  .rv-list[hidden] { display: none; }
+  .rv-list button { display: grid; gap: 3px; padding: 8px 10px; text-align: left; background: none; border: 1px solid transparent; cursor: pointer; }
+  .rv-list button.on { border-color: var(--red); background: var(--ui-field); }
+  .rv-list small, .rv-file summary { font: 500 11px/1.3 var(--mono); color: var(--ui-muted); }
+  .rv-list span { font-size: 13px; line-height: 1.3; }
+  .rv-body { overflow: auto; padding: 14px 16px 18px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; align-content: start; min-width: 0; flex: 1; }
+  .rv-view { display: grid; gap: 8px; }
+  .rv-switch { display: flex; align-items: center; gap: 10px; font: 500 12px/1 var(--mono); text-transform: uppercase; letter-spacing: .08em; color: var(--ui-muted); }
+  .rv-switch span { cursor: pointer; } .rv-switch span.on { color: var(--ui-fg); }
+  .rv-switch small { margin-left: 8px; font: 500 11px/1 var(--mono); text-transform: none; letter-spacing: 0; }
+  /* One toggle: left = the slide as it was, right = as it is now */
+  .rv-toggle { position: relative; width: 46px; height: 24px; padding: 0; border-radius: 12px; border: 1px solid var(--ui-line); background: var(--ui-field); cursor: pointer; transition: background .15s, border-color .15s; }
+  .rv-toggle::after { content: ""; position: absolute; left: 2px; top: 2px; width: 18px; height: 18px; border-radius: 50%; background: var(--ui-fg); transition: transform .15s; }
+  .rv-toggle[aria-checked="true"] { background: var(--red); border-color: var(--red); }
+  .rv-toggle[aria-checked="true"]::after { transform: translateX(22px); }
+  .rv-toggle:focus-visible { outline: 2px solid var(--ui-muted); outline-offset: 2px; }
+  .rv-frame .off { visibility: hidden; }
+  .rv-frame > div { position: absolute; inset: 0; display: grid; place-items: center; }
+  .rv-frame { position: relative; aspect-ratio: 16 / 9; overflow: hidden; background: var(--ink); border: 1px solid var(--ui-line); display: grid; place-items: center; font-size: 13px; color: var(--ui-muted); }
+  .rv-frame iframe { position: absolute; left: 0; top: 0; width: 1280px; height: 720px; border: 0; transform-origin: 0 0; pointer-events: none; }
+  .rv-file summary { cursor: pointer; padding: 4px 0; }
+  .rv-file pre { margin: 4px 0 0; padding: 8px 0; background: var(--ui-bg); border: 1px solid var(--ui-line); font: 11px/1.5 var(--mono); overflow: auto; max-height: 340px; }
+  .rv-file pre div { padding: 0 10px; white-space: pre; min-width: max-content; }
+  .rv-file .a { background: rgb(91 194 138 / .16); } .rv-file .d { background: rgb(238 52 44 / .16); } .rv-file .g { color: var(--ui-muted); }
+
+  /* "+ New deck": its title and its style guide */
+  .nd { width: min(460px, calc(100vw - 32px)); padding: 0; border: 1px solid var(--ui-line); background: var(--ui-panel); color: var(--ui-fg); }
+  .nd::backdrop { background: rgb(8 8 9 / .7); }
+  .nd form { display: grid; gap: 14px; padding: 18px; }
+  .nd fieldset { border: 0; margin: 0; padding: 0; display: grid; gap: 6px; }
+  .nd legend, .nd label.t { font: 500 11px/1 var(--mono); text-transform: uppercase; letter-spacing: .08em; color: var(--ui-muted); padding: 0; margin-bottom: 6px; display: block; }
+  .nd .style { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; padding: 10px 12px; border: 1px solid var(--ui-line); cursor: pointer; }
+  .nd .style:has(input:checked) { border-color: var(--red); }
+  .nd .style input { width: auto; grid-row: span 2; align-self: start; margin-top: 3px; accent-color: var(--red); }
+  .nd .style b { font-size: 14px; } .nd .style span { font-size: 12px; line-height: 1.4; color: var(--ui-muted); }
+  .nd .row { display: flex; justify-content: flex-end; gap: 8px; }
+  .ov-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(256px, 1fr)); gap: 18px; }
+  .thumb { position: relative; aspect-ratio: 16 / 9; background: var(--ink); border: 2px solid transparent; cursor: pointer; overflow: hidden; padding: 0; }
+  .thumb.on { border-color: var(--red); }
+  .thumb iframe { position: absolute; left: 0; top: 0; width: 1280px; height: 720px; border: 0; transform-origin: 0 0; pointer-events: none; }
+  .thumb .cap { position: absolute; left: 0; right: 0; bottom: 0; display: flex; justify-content: space-between; gap: 8px; padding: 6px 8px;
+                background: linear-gradient(transparent, rgb(0 0 0 / .85)); font: 500 11px/1.2 var(--mono); text-align: left; }
+  .thumb .cap .todo { color: var(--red); }
+</style>
+</head>
+<body>
+<div class="app">
+  <main class="stage" id="stage">
+    <nav class="bar" aria-label="Navigation">
+      <button id="b-prev" title="Previous (←)">←</button>
+      <span class="count" id="count">– / –</span>
+      <button id="b-next" title="Next (→)">→</button>
+      <button id="b-new" title="A new slide after this one: the recording goes on there, and what you say is what Claude puts on it">+ Slide<kbd>N</kbd></button>
+      <span class="sep"></span>
+      <button id="b-ov">Overview<kbd>O</kbd></button>
+      <button id="b-ed">Edit<kbd>E</kbd></button>
+      <button id="b-fs">Fullscreen<kbd>F</kbd></button>
+      <button id="b-lang" title="French / English version">FR · EN<kbd>L</kbd></button>
+      <button id="b-fb" title="Record feedback for Claude: draw on the slides and speak. While recording, N adds a slide after this one">Feedback<kbd>R</kbd></button>
+      <span class="fb-level" id="fb-level" title="Microphone level"><i></i></span>
+      <button id="b-tasks" title="Feedback sessions and Claude's tasks">Tasks<kbd>T</kbd></button>
+      <button id="b-dsl" title="Show the feedback language as it is written">DSL<kbd>D</kbd></button>
+    </nav>
+    <aside class="fbp" id="fbp" hidden></aside>
+    <svg class="fb-show" id="fb-show" viewBox="0 0 1280 720"></svg>
+    <div class="pins" id="pins"></div>
+    <pre class="dsl" id="dsl" hidden></pre>
+    <div class="cw" id="cw" hidden><span>Claude works on this slide</span></div>
+    <div class="claude-at" id="claude-at" hidden>
+      <div class="ca-clawd" id="ca-clawd">
+        <img id="ca-img" alt="">
+        <!-- Shown when the animations are not there: a small pixel mascot in Claude's orange, drawn for Keystone -->
+        <svg viewBox="0 0 11 8" shape-rendering="crispEdges" aria-hidden="true">
+          <g fill="#d97757"><rect x="2" y="0" width="7" height="1"/><rect x="1" y="1" width="9" height="3"/><rect x="0" y="4" width="11" height="1"/><rect x="1" y="5" width="9" height="1"/>
+            <g class="ca-a"><rect x="1" y="6" width="1" height="2"/><rect x="3" y="6" width="1" height="1"/><rect x="5" y="6" width="1" height="2"/><rect x="7" y="6" width="1" height="1"/><rect x="9" y="6" width="1" height="2"/></g>
+            <g class="ca-b"><rect x="1" y="6" width="1" height="1"/><rect x="3" y="6" width="1" height="2"/><rect x="5" y="6" width="1" height="1"/><rect x="7" y="6" width="1" height="2"/><rect x="9" y="6" width="1" height="1"/></g></g>
+          <g fill="#161617"><rect x="3" y="2" width="1" height="1"/><rect x="7" y="2" width="1" height="1"/></g>
+        </svg>
+        <span class="ca-burst" aria-hidden="true"><i style="--x:-46px;--y:-40px;--c:#ffd43b"></i><i style="--x:-22px;--y:-58px;--c:#69db7c"></i><i style="--x:6px;--y:-62px;--c:#4dabf7"></i><i style="--x:34px;--y:-50px;--c:#f783ac"></i><i style="--x:52px;--y:-26px;--c:#ffd43b"></i><i style="--x:-56px;--y:-12px;--c:#e599f7"></i><i style="--x:20px;--y:-34px;--c:#ff922b"></i><i style="--x:-10px;--y:-36px;--c:#fff"></i></span>
+      </div>
+      <span class="ca-say" id="ca-say"><b id="ca-step"></b><i id="ca-task"></i></span>
+      <span class="ca-diff" id="ca-diff" title="Lines added and removed in the deck's files by this run"></span>
+      <button class="ca-link" id="ca-goto" title="Go to the slide Claude works on" hidden></button>
+      <button class="ca-link" id="ca-review" title="What Claude changed, slide by slide, before and after" hidden>Review</button>
+      <button class="ca-stop" id="ca-stop" title="Interrupt Claude now: what it already changed stays" hidden>■ Stop</button>
+      <button class="ca-more" id="ca-more" title="What Claude does, step by step">▴</button>
+      <button class="ca-close" id="ca-close" title="Close">×</button>
+      <div class="ca-detail" id="ca-detail" hidden></div>
+      <i class="ca-timer" id="ca-timer"></i>
+    </div>
+    <div class="checks" id="checks"></div>
+    <svg class="fb" id="fb" viewBox="0 0 1280 720" hidden></svg>
+  </main>
+
+  <aside class="editor" id="editor" hidden>
+    <div class="ed-head">
+      <div class="row"><strong id="ed-title">Slide</strong><span class="pill" id="ed-status"></span></div>
+      <span class="ed-id" id="ed-id"></span>
+      <span class="ck-sum" id="ck-sum"></span>
+    </div>
+    <form class="ed-body" id="ed-form" autocomplete="off">
+      <div class="field"><label for="f-title">Title</label><input id="f-title"></div>
+      <div class="field"><label for="f-text">Text</label><textarea id="f-text" rows="7"></textarea>
+        <span class="hint">The content as it should appear on the slide.</span></div>
+      <div class="field"><label for="f-note">Message to Claude</label><textarea id="f-note" rows="4" placeholder="E.g. put the 3 points in columns with an icon each. Or press R to say it and draw on the slide."></textarea>
+        <div class="send"><button class="btn primary" id="b-note" type="button">Send to Claude<kbd style="color:#fff9">⌘↵</kbd></button>
+          <button class="btn" id="b-talk" type="button" title="Speak, and draw on the slide; R (or this button) sends it to Claude">Talk to Claude<kbd>R</kbd></button></div>
+        <span class="hint" id="note-hint"></span></div>
+      <div class="field"><label for="f-notes">Speaker notes</label><textarea id="f-notes" rows="4"></textarea></div>
+    </form>
+    <div class="ed-foot">
+      <div class="row">
+        <button class="btn primary" id="b-save" type="button">Save<kbd style="color:#fff9">⌘S</kbd></button>
+        <button class="btn" id="b-add" type="button">+ Slide after</button>
+      </div>
+      <div class="row">
+        <button class="btn" id="b-up" type="button">↑ Move up</button>
+        <button class="btn" id="b-down" type="button">↓ Move down</button>
+        <button class="btn danger" id="b-del" type="button">Delete</button>
+      </div>
+      <span class="saved" id="saved"></span>
+    </div>
+  </aside>
+</div>
+
+<dialog class="rv" id="review">
+  <div class="rv-head"><b id="rv-title"></b><span class="ca-diff" id="rv-count"></span><button class="btn" id="rv-later" title="Close: the review stays available">Later</button><button class="btn primary" id="rv-done" title="Seen: the next review starts from now">Done</button></div>
+  <div class="rv-main"><nav class="rv-list" id="rv-list"></nav><div class="rv-body" id="rv-body"></div></div>
+</dialog>
+<dialog class="nd" id="new-deck"><form method="dialog">
+  <div><label class="t" for="nd-title">Title of the new deck</label><input id="nd-title" required></div>
+  <fieldset id="nd-styles"><legend>Style guide</legend></fieldset>
+  <div class="row"><button class="btn" value="cancel" formnovalidate>Cancel</button><button class="btn primary" value="create">Create deck</button></div>
+</form></dialog>
+<div class="overview" id="overview" hidden><nav class="ov-decks" id="ov-decks" aria-label="Decks" hidden></nav><div class="ov-grid" id="ov-grid"></div></div>
+
+<script>
+const $ = id => document.getElementById(id);
+// Shortcuts take ⌘ or Ctrl; their labels say the one of this computer
+const MAC = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent), CMD = MAC ? "⌘" : "Ctrl+";
+if (!MAC) for (const k of document.querySelectorAll("kbd")) k.textContent = k.textContent.replace("⌘", CMD);
+// Optional alternative style for the whole deck: /?style=b-editorial
+const STYLE = new URLSearchParams(location.search).get("style") ? `&style=${new URLSearchParams(location.search).get("style")}` : "";
+// English version of the deck: /?lang=en (slide.html + slides/<id>/slide.en.json, French slide when missing)
+const LANG = new URLSearchParams(location.search).get("lang") === "en" ? "en" : "fr";
+const Q = STYLE + (LANG === "en" ? "&lang=en" : "");
+function switchLang() {
+  const u = new URL(location.href);
+  if (LANG === "en") u.searchParams.delete("lang"); else u.searchParams.set("lang", "en");
+  location.href = u.href;
+}
+const stage = $("stage");
+let deck = { slides: [] }, cur = 0, frames = new Map(), dirty = false, box = { s: 1, x: 0, y: 0 };
+
+const api = async (url, opts = {}) => {
+  const res = await fetch(url, { headers: { "content-type": "application/json" }, ...opts, body: opts.body && JSON.stringify(opts.body) });
+  if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || res.statusText);
+  return res.json();
+};
+
+// ---------- Stage ----------
+function fit() {
+  const w = stage.clientWidth, h = stage.clientHeight, s = Math.min(w / 1280, h / 720);
+  box = { s, x: (w - 1280 * s) / 2, y: (h - 720 * s) / 2 };
+  for (const f of frames.values()) {
+    f.style.transform = `scale(${s})`;
+    f.style.left = (w - 1280 * s) / 2 + "px";
+    f.style.top = (h - 720 * s) / 2 + "px";
+  }
+  for (const id of ["fb", "fb-show", "cw"]) Object.assign($(id).style, { left: box.x + "px", top: box.y + "px", width: 1280 * s + "px", height: 720 * s + "px" });
+  renderPins();
+}
+function slideEvent(f, name, dir = 1) { try { f.contentWindow.dispatchEvent(new CustomEvent(name, { detail: { dir } })); } catch {} }
+
+function makeFrame(id) {
+  const f = document.createElement("iframe");
+  f.className = "frame"; f.title = id; f.allow = "autoplay; fullscreen";
+  f.dataset.id = id; f.dataset.loaded = "0"; // loaded on demand by ensureWindow()
+  f.addEventListener("load", () => {
+    if (f.dataset.loaded !== "1") return; // about:blank after unloading
+    // Keys pressed while the slide has focus still drive the deck
+    try { f.contentWindow.addEventListener("keydown", onKey); } catch {}
+    // Mouse moves over the slide happen in the iframe, not here: they must wake the bar too
+    try { f.contentWindow.addEventListener("mousemove", wake); } catch {}
+    if (deck.slides[cur]?.id === id) { f.contentDocument?.body?.classList.add("sa-active"); slideEvent(f, "sa:enter"); renderChecks(); }
+  });
+  stage.insertBefore(f, stage.firstChild);
+  return f;
+}
+
+// Only slides near the current one stay loaded: keeps memory and WebGL contexts bounded (3D slides use one each).
+const WINDOW = 2;
+function ensureWindow() {
+  deck.slides.forEach((s, j) => {
+    const f = frames.get(s.id); if (!f) return;
+    const near = Math.abs(j - cur) <= WINDOW;
+    if (near && f.dataset.loaded !== "1") { f.dataset.loaded = "1"; f.src = `/render/${s.id}?t=${Date.now()}${Q}`; }
+    if (!near && f.dataset.loaded === "1") { f.dataset.loaded = "0"; f.src = "about:blank"; }
+  });
+}
+
+function syncFrames() {
+  const ids = new Set(deck.slides.map(s => s.id));
+  for (const [id, f] of frames) if (!ids.has(id)) { f.remove(); frames.delete(id); }
+  for (const s of deck.slides) if (!frames.has(s.id)) frames.set(s.id, makeFrame(s.id));
+  fit();
+}
+
+function show(i, { fromHash = false } = {}) {
+  if (!deck.slides.length) return;
+  i = Math.max(0, Math.min(deck.slides.length - 1, i));
+  const prev = deck.slides[cur] && frames.get(deck.slides[cur].id);
+  if (prev && i !== cur) { prev.classList.remove("on"); prev.contentDocument?.body?.classList.remove("sa-active"); slideEvent(prev, "sa:leave"); }
+  const dir = i < cur ? -1 : 1;
+  // Keys pressed in a slide reach us only once that slide has loaded. A clicked slide keeps the focus, and fast
+  // presses reload or unload it (ensureWindow): take the focus back so the next keys still move the deck.
+  if (i !== cur && document.activeElement?.tagName === "IFRAME") { document.activeElement.blur(); window.focus(); }
+  cur = i;
+  fbEnter();
+  ensureWindow();
+  const f = frames.get(deck.slides[cur].id);
+  if (!f.classList.contains("on")) { f.classList.add("on"); f.contentDocument?.body?.classList.add("sa-active"); slideEvent(f, "sa:enter", dir); }
+  $("count").textContent = `${cur + 1} / ${deck.slides.length}`;
+  if (!fromHash) history.replaceState(null, "", "#" + (cur + 1));
+  fillEditor();
+  if (openCheck && !openCheck.startsWith(deck.slides[cur].id + "/")) openCheck = null;
+  renderChecks(); renderPins(); markWork(); if (!fbp.hidden) renderFeedback();
+  document.querySelectorAll(".thumb").forEach((t, k) => t.classList.toggle("on", k === cur));
+}
+
+function reloadFrame(id) {
+  const f = frames.get(id); if (!f || f.dataset.loaded !== "1") return;
+  f.src = `/render/${id}?t=${Date.now()}${Q}`;
+}
+
+async function loadDeck() {
+  const curId = deck.slides[cur]?.id;
+  deck = await api("/api/deck" + (LANG === "en" ? "?lang=en" : ""));
+  document.title = deck.title;
+  syncFrames();
+  // Stay on the same slide when others were added, moved or deleted
+  const i = deck.slides.findIndex(s => s.id === curId);
+  if (i >= 0) cur = i;
+  show(Math.min(cur, deck.slides.length - 1), { fromHash: true });
+  if (!$("overview").hidden) buildOverview();
+}
+
+// Slides with builds (window.saNext / saPrev) consume arrow presses until they are done
+function step(delta) {
+  const f = deck.slides[cur] && frames.get(deck.slides[cur].id);
+  try { if (f && f.contentWindow[delta > 0 ? "saNext" : "saPrev"]?.()) return; } catch {}
+  show(cur + delta);
+}
+
+// ---------- Editor ----------
+const F = { title: $("f-title"), text: $("f-text"), notes: $("f-notes") };
+let editingId = null; // the slide the form belongs to; saves always go there
+function fillEditor(force = false) {
+  const s = deck.slides[cur]; if (!s) return;
+  if (dirty && !force) {
+    if (s.id === editingId) return;
+    // Leaving a slide with unsaved edits: save them to that slide, then show this one
+    save().then(() => fillEditor(true)).catch(e => $("saved").textContent = "Error: " + e.message);
+    return;
+  }
+  editingId = s.id;
+  for (const k in F) F[k].value = s.brief[k] || "";
+  $("ed-title").textContent = `Slide ${cur + 1}`;
+  $("ed-id").textContent = s.id;
+  const todo = s.brief.status === "todo" || !s.styled;
+  $("ed-status").className = "pill " + (todo ? "todo" : "done");
+  $("ed-status").textContent = todo ? "To style" : "Styled";
+  $("b-up").disabled = cur === 0; $("b-down").disabled = cur === deck.slides.length - 1;
+  dirty = false;
+}
+for (const el of Object.values(F)) el.addEventListener("input", () => { dirty = true; $("saved").textContent = "Unsaved changes"; });
+
+async function save() {
+  const id = editingId; if (!id) return;
+  const brief = Object.fromEntries(Object.entries(F).map(([k, el]) => [k, el.value]));
+  const { brief: next } = await api(`/api/slides/${id}`, { method: "PUT", body: brief });
+  const s = deck.slides.find(x => x.id === id); if (s) s.brief = next;
+  dirty = false; fillEditor(true);
+  $("saved").textContent = "Saved";
+}
+$("b-save").onclick = () => save().catch(e => $("saved").textContent = "Error: " + e.message);
+
+// A message typed for Claude about this slide: a feedback session with a Note line, handled like a recording
+// (tasks, pins, Claude at once when Auto is on). The brief is saved first, so Claude reads the latest title and text.
+async function sendNote() {
+  const text = $("f-note").value.trim(), id = editingId; if (!text || !id) return $("f-note").focus();
+  $("b-note").disabled = true;
+  try {
+    if (dirty) await save();
+    await api("/api/feedback", { method: "POST", body: { events: [{ type: "enter", t: 0, slide: id }, { type: "note", text }] } });
+    $("f-note").value = ""; $("note-hint").textContent = claude.auto ? "Sent" : "Saved: Auto is off, it waits for Claude";
+    caClosed = false; toggleTasks(true);
+    if (claude.auto && !claude.running) { fbHandoff = Date.now(); renderClaude(); setTimeout(renderClaude, 20500); }
+  } catch (e) { $("note-hint").textContent = "Error: " + e.message; }
+  $("b-note").disabled = false;
+}
+$("b-note").onclick = sendNote;
+// The same by voice: a recording on this slide (as key R), started from the editor
+$("b-talk").onclick = async () => {
+  $("b-talk").blur();
+  if (rec) return stopFeedback();
+  if (dirty) await save().catch(() => {});
+  startFeedback();
+};
+$("f-note").addEventListener("keydown", e => { if ((e.metaKey || e.ctrlKey) && e.key === "Enter") { e.preventDefault(); sendNote(); } });
+
+// A new slide after the current one: the editor's button, and key N while recording. While recording, the recording
+// goes on, on the new slide: what the user says there is what Claude puts on it (the title field does not take the
+// keys, so R still stops).
+async function addSlide() {
+  if (dirty) await save();
+  const s = deck.slides[cur];
+  await api("/api/slides", { method: "POST", body: { after: s?.id, brief: { title: "New slide" } } });
+  dirty = false; await loadDeck(); show(cur + 1);
+  if (rec) return document.activeElement?.blur();
+  $("editor").hidden = false; fit(); F.title.select();
+}
+$("b-add").onclick = addSlide;
+$("b-new").onclick = () => { $("b-new").blur(); addSlide(); };
+async function move(delta) {
+  const order = deck.slides.map(s => s.id), j = cur + delta;
+  if (j < 0 || j >= order.length) return;
+  [order[cur], order[j]] = [order[j], order[cur]];
+  await api("/api/order", { method: "PUT", body: { order } });
+  cur = j; await loadDeck();
+}
+$("b-up").onclick = () => move(-1);
+$("b-down").onclick = () => move(1);
+
+// Two-step delete: first click arms, second click deletes
+let armTimer;
+$("b-del").onclick = async () => {
+  const b = $("b-del");
+  if (!b.classList.contains("armed")) {
+    b.classList.add("armed"); b.textContent = "Confirm delete";
+    clearTimeout(armTimer); armTimer = setTimeout(() => { b.classList.remove("armed"); b.textContent = "Delete"; }, 3000);
+    return;
+  }
+  clearTimeout(armTimer); b.classList.remove("armed"); b.textContent = "Delete";
+  await api(`/api/slides/${deck.slides[cur].id}`, { method: "DELETE" });
+  dirty = false; await loadDeck();
+  $("saved").textContent = "Slide deleted (recoverable from .trash/)";
+};
+
+function toggleEditor(force) {
+  $("editor").hidden = force === undefined ? !$("editor").hidden : !force;
+  document.body.classList.toggle("editing", !$("editor").hidden);
+  fit(); renderChecks(); if (!$("editor").hidden) F.title.focus();
+}
+
+// ---------- Fact checks ----------
+// slides/<id>/checks.json: Claude's bubbles. Each one is anchored on a piece of slide text and keeps a thread;
+// a reply posted here sets status "todo" until Claude answers in the file.
+const VERDICT = { ok: ["Accurate", "✓"], nuance: ["Needs nuance", "~"], faux: ["Inaccurate", "✕"] };
+let openCheck = null; // "<slideId>/<checkId>"
+const drafts = new Map();
+const norm = t => t.replace(/­/g, "").replace(/[’']/g, "'").replace(/\s+/g, " ").trim().toLowerCase();
+
+// Deepest element containing the snippet (an exact match wins), measured at the end of its text
+function anchorPoint(doc, snippet) {
+  const want = norm(snippet); let best = null, exact = null;
+  for (const el of doc.body.querySelectorAll("*")) {
+    if (/^(SCRIPT|STYLE|TEMPLATE)$/.test(el.tagName)) continue;
+    const t = norm(el.textContent); if (!t.includes(want)) continue;
+    if (t === want && (!exact || exact.contains(el))) exact = el;
+    if (!best || best.contains(el)) best = el;
+  }
+  const el = exact || best; if (!el) return null;
+  const r = doc.createRange(); r.selectNodeContents(el);
+  // Narrow to the snippet itself, so two checks on one line sit on their own words
+  const nodes = [], walk = doc.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+  let raw = ""; for (let t; (t = walk.nextNode());) { nodes.push([t, raw.length]); raw += t.data; }
+  const pat = snippet.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/\s+/g, "[\\s\u00ad]+").replace(/[’']/g, "[’']");
+  const m = new RegExp(pat, "i").exec(raw);
+  if (m) {
+    const at = i => { const [t, o] = nodes.findLast(([, o]) => o <= i) || nodes[0]; return [t, Math.min(i - o, t.length)]; };
+    r.setStart(...at(m.index)); r.setEnd(...at(m.index + m[0].length));
+  }
+  const rects = [...r.getClientRects()].filter(q => q.width > 0 && q.height > 0);
+  const q = rects.at(-1) || el.getBoundingClientRect();
+  if (!q.width && !q.height) return null;
+  return { x: Math.min(q.right, 1262), y: q.top + q.height / 2 };
+}
+
+function renderChecks() {
+  const layer = $("checks"), s = deck.slides[cur];
+  const checks = s?.checks || [];
+  const n = k => checks.filter(c => c.verdict === k).length;
+  $("ck-sum").textContent = checks.length
+    ? `${checks.length} check${checks.length > 1 ? "s" : ""} · ${n("faux")} inaccurate · ${n("nuance")} need${n("nuance") === 1 ? "s" : ""} nuance · ${n("ok")} accurate`
+    : "No checks on this slide";
+  // Keep the reply being typed across re-renders (live reload, resize)
+  const active = document.activeElement?.closest?.(".ck-card") ? document.activeElement.id : null;
+  layer.innerHTML = "";
+  if ($("editor").hidden || !s) return;
+  let doc = null;
+  try { const f = frames.get(s.id); if (f?.dataset.loaded === "1") doc = f.contentDocument; } catch {}
+  let spare = 0; const placed = [], cards = [];
+  checks.forEach((c, i) => {
+    const key = `${s.id}/${c.id}`;
+    const p = doc?.body ? anchorPoint(doc, c.anchor) : null;
+    // Unplaced bubbles line up along the right edge of the slide
+    let x = box.x + (p ? p.x : 1250) * box.s; const y = box.y + (p ? p.y : 40 + 34 * spare++) * box.s;
+    while (placed.some(([px, py]) => Math.abs(px - x) < 24 && Math.abs(py - y) < 24)) x += 26;
+    placed.push([x, y]);
+    const dot = document.createElement("button");
+    dot.className = `ck-dot ${c.verdict} ${c.status === "todo" ? "todo" : ""} ${p ? "" : "unplaced"} ${openCheck === key ? "open" : ""}`;
+    dot.style.left = x + "px"; dot.style.top = y + "px";
+    dot.textContent = VERDICT[c.verdict]?.[1] || "?";
+    dot.title = `${VERDICT[c.verdict]?.[0]} · “${c.anchor}”`;
+    dot.onclick = () => { openCheck = openCheck === key ? null : key; renderChecks(); };
+    layer.append(dot);
+    if (openCheck === key) cards.push(checkCard(c, key, x, y, i + 1));
+  });
+  layer.append(...cards); // above every dot
+  if (active && $(active)) { $(active).focus(); $(active).setSelectionRange(9e9, 9e9); }
+}
+
+function checkCard(c, key, x, y, num) {
+  const card = document.createElement("div");
+  card.className = "ck-card " + c.verdict;
+  card.innerHTML = `
+    <div class="ck-bubble">
+      <div class="ck-top"><span class="ck-verdict"></span><button class="ck-close" title="Close">×</button></div>
+      <p class="ck-claim"></p><p class="ck-note"></p><span class="ck-src"></span>
+    </div>
+    <div class="ck-thread"></div>
+    <form class="ck-reply">
+      <label>Reply to Claude</label>
+      <textarea></textarea>
+      <div class="row"><span class="ck-hint">${CMD}↵ to send</span><button class="btn primary" type="submit">Send</button></div>
+    </form>`;
+  const q = sel => card.querySelector(sel);
+  q(".ck-verdict").textContent = `${num} · ${VERDICT[c.verdict]?.[0] || c.verdict}${c.status === "todo" ? " · waiting for Claude" : ""}`;
+  q(".ck-claim").textContent = `“${c.anchor}”`;
+  q(".ck-note").textContent = c.note;
+  if (c.source?.url) { const a = document.createElement("a"); a.href = c.source.url; a.target = "_blank"; a.rel = "noopener"; a.textContent = c.source.label; q(".ck-src").append("Source: ", a); }
+  else if (c.source) q(".ck-src").textContent = "Source: " + c.source.label;
+  for (const m of c.thread || []) {
+    const d = document.createElement("div"); d.className = "ck-msg " + m.from;
+    const b = document.createElement("b"); b.textContent = m.from === "claude" ? "Claude" : "You";
+    d.append(b, m.text); q(".ck-thread").append(d);
+  }
+  if (!c.thread?.length) q(".ck-thread").remove();
+  const ta = q("textarea"); ta.id = "ck-" + key.replace("/", "-"); ta.placeholder = "E.g. I keep the wording, it is simplified on purpose. Or: suggest a rewording.";
+  ta.value = drafts.get(key) || "";
+  ta.oninput = () => drafts.set(key, ta.value);
+  ta.onkeydown = e => { if ((e.metaKey || e.ctrlKey) && e.key === "Enter") { e.preventDefault(); q("form").requestSubmit(); } };
+  q(".ck-close").onclick = () => { openCheck = null; renderChecks(); };
+  q("form").onsubmit = async e => {
+    e.preventDefault();
+    const text = ta.value.trim(); if (!text) return ta.focus();
+    const btn = q("button[type=submit]"); btn.disabled = true; btn.textContent = "Sending…";
+    try {
+      const [sid, cid] = key.split("/");
+      const { check } = await api(`/api/checks/${sid}/${cid}`, { method: "POST", body: { text } });
+      const s = deck.slides.find(x => x.id === sid); if (s) s.checks = s.checks.map(x => x.id === cid ? check : x);
+      drafts.delete(key); renderChecks();
+    } catch (err) { btn.disabled = false; btn.textContent = "Retry"; q(".ck-hint").textContent = "Error: " + err.message; }
+  };
+  // Below the dot, kept inside the stage
+  const W = 340, sw = stage.clientWidth;
+  card.style.left = Math.max(8, Math.min(x - 24, sw - W - 8)) + "px";
+  card.style.top = (y + 18) + "px";
+  requestAnimationFrame(() => {
+    const over = card.offsetTop + card.offsetHeight - (stage.clientHeight - 8);
+    if (over > 0) card.style.top = Math.max(8, card.offsetTop - over) + "px";
+  });
+  return card;
+}
+// Slides animate in: re-measure anchors a few times after entering, then on demand
+setInterval(() => { if (!$("editor").hidden && !openCheck) renderChecks(); }, 1500);
+
+// ---------- Feedback ----------
+// Key R records the microphone, the strokes drawn over the slides and the slide changes on one clock (ms since the
+// recording started). R again saves it as one session (POST /api/feedback → <deck>/feedback/<session>/feedback.ks;
+// the server transcribes the voice into it); Escape twice discards it; ⌘Z takes the last stroke back.
+// A recording is not cut when the slide changes: the user often explains one thing over several slides, so Claude
+// must get the whole of it at once. Strokes are in slide px, reduced to a few points; each one lists the slide
+// elements under it and a shape hint.
+const fb = $("fb");
+let rec = null; // the recording { about, stream, audio, peak, sending, saved } and its part in progress { t0, recorder, chunks, events, slide, strokes, shown, stroke }
+let fbSaving = false; // the last part is being saved: R does not start another recording (a second press made a 2 s session)
+const fbLabel = text => $("b-fb").firstChild.data = text;
+const fbNow = () => Math.max(0, Math.round(performance.now() - rec.t0));
+
+async function startFeedback(about) { // about = { session, task, ask, text }: a follow-up recorded from that task's pin (ask: the answer to a question)
+  if (!deck.slides[cur] || rec || fbSaving) return;
+  let stream = null;
+  try { stream = await navigator.mediaDevices.getUserMedia({ audio: true }); } catch {} // no microphone: strokes only
+  const r = rec = { about, stream, peak: 0, sending: Promise.resolve(), saved: { parts: 0, strokes: 0, says: 0 } };
+  dslRec = []; if (voiceOn) hush();
+  fbPart();
+  if (stream) {
+    // Level meter, and the loudest level heard: a silent microphone is reported when the recording is saved
+    r.audio = new AudioContext();
+    const node = r.audio.createAnalyser(), data = new Float32Array(node.fftSize);
+    r.audio.createMediaStreamSource(stream).connect(node);
+    (function meter() {
+      if (rec !== r) return;
+      node.getFloatTimeDomainData(data);
+      const level = Math.sqrt(data.reduce((sum, v) => sum + v * v, 0) / data.length);
+      r.peak = Math.max(r.peak, level);
+      const shown = Math.max(0, Math.min(1, (20 * Math.log10(level + 1e-6) + 60) / 60)); // -60..0 dB
+      $("fb-level").firstChild.style.width = shown * 100 + "%";
+      $("claude-at").style.setProperty("--level", shown);
+      requestAnimationFrame(meter);
+    })();
+  }
+  document.body.classList.add("recording"); fb.removeAttribute("hidden"); // an SVG element has no .hidden property
+  fbLabel(`● Stop${about ? (about.ask ? " answer" : " follow-up") : ""}${stream ? "" : " (no microphone)"}`);
+  openPin = null; caClosed = false; fbEnter(); renderPins(); renderClaude();
+  // Claude reads this slide while the user talks: it is ready when the first part arrives
+  if (claude.auto) api("/api/claude/warm", { method: "POST", body: { slide: deck.slides[cur].id } }).catch(() => {});
+}
+
+// A new part starts: its own clock, audio and events
+function fbPart() {
+  const r = rec, chunks = [];
+  Object.assign(r, { t0: performance.now(), chunks, events: [], strokes: 0, shown: [], stroke: null, slide: null, recorder: null });
+  if (!r.stream) return;
+  const recorder = r.recorder = new MediaRecorder(r.stream);
+  recorder.ondataavailable = e => chunks.push(e.data);
+  recorder.onstart = () => { if (r.recorder === recorder && !r.events.some(e => e.type !== "enter")) r.t0 = performance.now(); };
+  recorder.start();
+}
+// The part in progress is closed. → a promise of what the server gets: { events, audio, mime, ms }
+function fbCut() {
+  const { recorder, chunks, events } = rec, ms = fbNow();
+  if (!recorder) return Promise.resolve({ events, audio: "", mime: "", ms });
+  return new Promise(ok => {
+    recorder.onstop = () => {
+      const blob = new Blob(chunks, { type: recorder.mimeType }), fr = new FileReader();
+      fr.onload = () => ok({ events, audio: fr.result.split(",")[1], mime: blob.type, ms });
+      fr.readAsDataURL(blob);
+    };
+    recorder.stop();
+  });
+}
+// The recording is saved. Nothing in it (no stroke, under 1 s) is not sent; the server drops a recording with no
+// stroke and no word.
+function fbSend(r, part) {
+  r.sending = r.sending.then(async () => {
+    const { ms, ...body } = await part;
+    if (!body.events.some(e => e.type === "stroke") && (!body.audio || ms < 1000)) return;
+    const out = await api("/api/feedback", { method: "POST", body: { ...body, about: r.about } });
+    if (!out.session) return;
+    r.saved.parts++; r.saved.strokes += out.strokes; r.saved.says += out.says;
+    dslRec.push(out.session); renderDsl();
+  }).catch(e => r.saved.error = e.message);
+}
+
+// A slide is shown while recording: the recording goes on, its strokes start from a clean overlay
+function fbEnter() {
+  const id = deck.slides[cur]?.id;
+  if (!rec || !id || rec.slide === id) return;
+  fb.onpointerup();
+  rec.slide = id; rec.shown = []; fb.innerHTML = "";
+  rec.events.push({ type: "enter", t: fbNow(), slide: id });
+  renderDsl();
+}
+
+function fbUndo() {
+  const last = rec.shown.pop(); if (!last) return;
+  last.line.remove();
+  rec.events.push({ type: "undo", t: fbNow(), stroke: last.n });
+  renderDsl();
+}
+
+let fbArmed = 0; // Escape must be pressed twice within 3 s: a recording is not lost by one key
+async function stopFeedback(keep = true) {
+  const r = rec; if (!r) return;
+  if (!keep && Date.now() - fbArmed > 3000) { fbArmed = Date.now(); fbLabel("Esc again to discard"); return setTimeout(() => { if (rec === r) fbLabel("● Stop"); }, 3000); }
+  fb.onpointerup();
+  const last = fbCut();
+  rec = null; document.body.classList.remove("recording"); fb.setAttribute("hidden", ""); fb.innerHTML = ""; renderPins();
+  fbSaving = true; renderClaude();
+  fbLabel(keep ? (r.stream ? "Transcribing…" : "Saving…") : "Discarding…"); wake();
+  if (keep) fbSend(r, last); else await last;
+  await r.sending;
+  r.stream?.getTracks().forEach(t => t.stop()); r.audio?.close();
+  const { parts, strokes, says, error } = r.saved, n = (k, word) => `${k} ${word}${k === 1 ? "" : "s"}`;
+  const quiet = r.stream && 20 * Math.log10(r.peak + 1e-6) < -40;
+  fbLabel(error ? "Error: " + error : !parts ? (keep ? "Nothing to save" : "Feedback")
+    : quiet ? "Saved · no voice heard: check the microphone" : `Saved · ${n(strokes, "stroke")} · ${n(says, "phrase")}`);
+  if (parts) {
+    toggleTasks(true);
+    if (claude.auto && !claude.running) { fbHandoff = Date.now(); setTimeout(renderClaude, 20500); } // Claude takes over when the pictures are taken
+  }
+  fbSaving = false; renderClaude();
+  wake(); setTimeout(() => { if (!rec) fbLabel("Feedback"); }, 6000);
+}
+
+fb.onpointerdown = e => {
+  if (!rec || e.button) return;
+  fb.setPointerCapture(e.pointerId);
+  rec.stroke = { t0: fbNow(), pts: [], line: fb.appendChild(document.createElementNS("http://www.w3.org/2000/svg", "polyline")) };
+  fb.onpointermove(e);
+};
+fb.onpointermove = e => {
+  const k = rec?.stroke; if (!k) return;
+  const r = fb.getBoundingClientRect();
+  k.pts.push([(e.clientX - r.left) / box.s, (e.clientY - r.top) / box.s]);
+  k.line.setAttribute("points", (k.pts.length > 1 ? k.pts : [k.pts[0], k.pts[0]]).join(" ")); // one point: a dot
+  if (dslOn && !dslFrame) dslFrame = requestAnimationFrame(() => { dslFrame = 0; renderDsl(); });
+};
+fb.onpointerup = fb.onpointercancel = () => {
+  const k = rec?.stroke; if (!k) return;
+  rec.stroke = null;
+  // Tolerance follows the stroke's size: 1 px for handwriting (letters ~50 px), 3 px for a shape across the slide
+  const xs = k.pts.map(p => p[0]), ys = k.pts.map(p => p[1]);
+  const size = Math.hypot(Math.max(...xs) - Math.min(...xs), Math.max(...ys) - Math.min(...ys));
+  const points = simplify(k.pts, Math.min(3, Math.max(1, size / 100))).map(p => p.map(Math.round));
+  rec.events.push({ type: "stroke", span: [k.t0, fbNow()], points, kind: kindOf(points, size), targets: under(points) });
+  rec.shown.push({ n: ++rec.strokes, line: k.line });
+  renderDsl();
+};
+
+// A hint about the shape, from the path length, the distance between its ends and its size (bounding box diagonal).
+// Only clear cases get a name; handwriting, sketches and anything in between stay Free. Claude reads the points anyway.
+function kindOf(points, size) {
+  if (size < 6) return "Tap";
+  let length = 0;
+  for (let i = 1; i < points.length; i++) length += Math.hypot(points[i][0] - points[i - 1][0], points[i][1] - points[i - 1][1]);
+  const ends = Math.hypot(points.at(-1)[0] - points[0][0], points.at(-1)[1] - points[0][1]);
+  if (ends > .95 * length) return "Line";
+  if (length > 3.5 * size) return "Scribble";               // back and forth over the same place
+  if (ends < .25 * size && length > 1.8 * size) return "Loop"; // comes back to where it started, once around
+  return "Free";
+}
+
+// Ramer–Douglas–Peucker: drop the points closer than tol px to the line through their neighbours
+function simplify(pts, tol) {
+  if (pts.length < 3) return pts;
+  const a = pts[0], b = pts.at(-1), dx = b[0] - a[0], dy = b[1] - a[1], len = Math.hypot(dx, dy);
+  let far = 0, at = 0;
+  for (let i = 1; i < pts.length - 1; i++) {
+    const px = pts[i][0] - a[0], py = pts[i][1] - a[1];
+    const d = len ? Math.abs(dy * px - dx * py) / len : Math.hypot(px, py);
+    if (d > far) { far = d; at = i; }
+  }
+  return far <= tol ? [a, b] : [...simplify(pts.slice(0, at + 1), tol), ...simplify(pts.slice(at), tol).slice(1)];
+}
+
+// Does this element show something at this point? Its pictures and its box when it has a background or a border,
+// else its lines of text (8 px around): a paragraph is as wide as its column, and most of that is empty.
+function shows(el, x, y) {
+  const cs = getComputedStyle(el);
+  if (/^(img|canvas|video|svg)$/i.test(el.tagName) || el.ownerSVGElement || cs.backgroundColor !== "rgba(0, 0, 0, 0)"
+    || cs.backgroundImage !== "none" || ["Top", "Right", "Bottom", "Left"].some(k => parseFloat(cs[`border${k}Width`]))) return true;
+  // Text nodes one by one: a range over the whole element would also give the full-width boxes of its children
+  const r = el.ownerDocument.createRange(), walk = el.ownerDocument.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+  for (let t; (t = walk.nextNode());) {
+    r.selectNodeContents(t);
+    if ([...r.getClientRects()].some(q => x >= q.left - 8 && x <= q.right + 8 && y >= q.top - 8 && y <= q.bottom + 8)) return true;
+  }
+  return false;
+}
+
+// The slide elements under a stroke, most covered first: probed at its points and across its bounding box.
+// A probe counts for the nearest element that shows something there (none: the stroke is over an empty area).
+// An element is left out when one of its children was hit too.
+function under(points) {
+  const doc = frames.get(rec.slide)?.contentDocument; if (!doc) return [];
+  const xs = points.map(p => p[0]), ys = points.map(p => p[1]);
+  const x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
+  const probes = [...points];
+  for (const u of [.25, .5, .75]) for (const v of [.25, .5, .75]) probes.push([x0 + (x1 - x0) * u, y0 + (y1 - y0) * v]);
+  const hits = new Map();
+  for (const [x, y] of probes) {
+    let el = doc.elementFromPoint(x, y);
+    while (el && el !== doc.body && el !== doc.documentElement && !shows(el, x, y)) el = el.parentElement;
+    if (el && el !== doc.body && el !== doc.documentElement) hits.set(el, (hits.get(el) || 0) + 1);
+  }
+  return [...hits].filter(([el]) => ![...hits.keys()].some(o => o !== el && el.contains(o)))
+    .sort((p, q) => q[1] - p[1]).slice(0, 4).map(([el]) => ({
+      el: el.tagName.toLowerCase() + (el.id ? "#" + el.id : "") + (el.classList[0] ? "." + el.classList[0] : ""),
+      text: el.textContent.replace(/\s+/g, " ").trim().slice(0, 60),
+    }));
+}
+
+// The panel (key T): Claude's tasks (the Task lines of the sessions' feedback.ks), questions first, then what is in
+// progress, then what is done (folded). It is redrawn when a feedback file changes; the page and the slides are not
+// reloaded. What was heard is on each task's pin.
+const fbp = $("fbp");
+let fbDone = false; // the list of done tasks is unfolded
+let sessions = [], claude = {}; // claude: { auto, running: start time of the run in progress, last: { ok, text } }
+const TASK = { Todo: "To do", Doing: "Doing", Done: "Done", Ask: "Question", Stopped: "Stopped" };
+async function loadFeedback() {
+  ({ sessions, claude = {} } = await api("/api/feedback").catch(() => ({ sessions: [] })));
+  fbLoaded = true; renderClaude();
+  const open = sessions.flatMap(s => s.tasks).filter(t => !/^(Done|Stopped)$/.test(t.state) && !t.closed).length + sessions.filter(s => !s.tasks.length && !s.about).length;
+  $("b-tasks").firstChild.data = open ? `Tasks · ${open}` : "Tasks";
+  renderFeedback();
+  if (!$("pins").contains(document.activeElement)) renderPins(); // same for a reply
+}
+function renderFeedback() {
+  const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+  const here = deck.slides[cur]?.id;
+  fbp.innerHTML = "";
+  // Head: the switch of Claude with no terminal (on: each saved feedback and each reply on a pin is handled at once)
+  const head = el("div", "fbp-head"), auto = el("button", "fbp-link" + (claude.auto ? " on" : ""), `${claude.auto ? "●" : "○"} Auto`), close = el("button", "ck-close", "×");
+  auto.title = `Auto ${claude.auto ? "on" : "off"}. On: Claude handles each feedback as soon as it is saved. Off: feedback waits for a Claude session in the terminal.`;
+  auto.onclick = () => api("/api/claude", { method: "PUT", body: { auto: !claude.auto } }).then(loadFeedback);
+  close.onclick = () => toggleTasks(false);
+  const voice = el("button", "fbp-link" + (voiceOn ? " on" : ""), `${voiceOn ? "●" : "○"} Voice`); // ● on, ○ off: the head has no room for more
+  voice.title = `Voice ${voiceOn ? "on" + (voiceName ? " (" + voiceName.split(" (")[0] + ")" : "") : "off"}. On: Claude says aloud what it did and what it asks, with this computer's system voice. Never while you record.`;
+  voice.onclick = () => { voiceOn = !voiceOn; try { localStorage.setItem("ks-voice", voiceOn ? "1" : ""); } catch {} if (voiceOn) speak("D'accord, je te dirai ce que je fais."); else hush(); renderFeedback(); };
+  const log = el("button", "fbp-link", "Log");
+  log.title = "Claude's last run, step by step, with the lines it added and removed";
+  log.onclick = () => { caClosed = false; caOpen = false; showClawd(caShown || "done", claude.running ? (claude.step || "Starting") + "…" : claude.last?.text || "No run yet"); $("ca-more").click(); };
+  const stop = el("button", "fbp-link stop", "Stop"); stop.title = "Interrupt Claude now: what it already changed stays"; stop.onclick = stopClaude;
+  head.append(el("span", "", "Tasks"), ...(claude.running ? [stop] : []), log, voice, auto, close); fbp.append(head);
+  if (claude.changed && !claude.running) {
+    const note = el("div", "fbp-note"), open = el("button", "fbp-link on", "Review");
+    open.onclick = openReview; note.append(`Claude changed ${claude.changed === 1 ? "one slide" : claude.changed + " slides"} `, open); fbp.append(note);
+  }
+  if (claude.last?.ok === false) fbp.append(el("div", "fbp-note error", "Claude: " + claude.last.text));
+  for (const s of sessions) for (const e of s.errors) fbp.append(el("div", "fbp-note error", `feedback/${s.id}/feedback.ks line ${e.line}: ${e.message}`));
+
+  // Newest first. A row: the slide, the task (two lines at most), × to clear it
+  const tasks = sessions.flatMap(s => s.tasks.filter(t => !t.closed).map(t => ({ ...t, session: s.id })));
+  const clear = async list => { for (const t of list) await api(`/api/feedback/${t.session}/task/${t.name}`, { method: "POST", body: { close: true } }).catch(() => {}); loadFeedback(); };
+  const row = t => {
+    const i = deck.slides.findIndex(x => x.id === t.slide), item = el("div", `fbp-task ${t.state}${t.slide === here ? " here" : ""}`), go = el("button", "fbp-go"), x = el("button", "fbp-x", "×");
+    go.append(el("small", "", i < 0 ? t.slide : `${i + 1} · ${deck.slides[i].brief.title || t.slide}`), el("span", "", t.text)); go.title = t.text;
+    go.onclick = () => { if (i >= 0) { openPin = `${t.session}/${t.name}`; show(i); } };
+    x.title = t.state === "Done" ? "Clear this task" : "Clear this task: Claude will not do it"; x.onclick = () => clear([t]);
+    item.append(go, x); return item;
+  };
+  const group = (state, title, list, extra) => {
+    if (!list.length && !extra) return;
+    const head = el("div", "fbp-group " + state); head.append(el("span", "", `${title} · ${list.length}`));
+    fbp.append(head, ...list.map(row)); if (extra) fbp.append(el("div", "fbp-note", extra));
+  };
+  const waiting = sessions.filter(s => !s.tasks.length && !s.about).length;
+  group("Ask", "Questions for you", tasks.filter(t => t.state === "Ask"));
+  group("Doing", "In progress", tasks.filter(t => t.state === "Doing" || t.state === "Todo"),
+    waiting ? `${waiting} recording${waiting === 1 ? "" : "s"} not read yet${claude.auto ? "" : ": Auto is off"}` : "");
+  group("Stopped", "Stopped by you", tasks.filter(t => t.state === "Stopped"));
+  const done = tasks.filter(t => t.state === "Done");
+  if (done.length) {
+    const fold = el("details"), head = el("summary", "fbp-group Done"), all = el("button", "fbp-link", "Clear all");
+    fold.open = fbDone; fold.ontoggle = () => fbDone = fold.open;
+    all.onclick = e => { e.preventDefault(); clear(done); };
+    head.append(el("span", "", `Done · ${done.length}`), all); fold.append(head, ...done.map(row)); fbp.append(fold);
+  }
+  if (!tasks.length && !waiting) fbp.append(el("div", "fbp-note", "No task. Press R, draw on the slides and speak, then R again."));
+}
+// Pins: every task the user has not removed, on its slide: at the strokes it comes from, else along the top edge.
+// The open pin shows its card and draws those strokes again. From the card the user says more about the task (a typed
+// reply, or a follow-up recording: both set it back to "to do") or removes the pin.
+let openPin = null; // "<session>/<task>"
+const pinDrafts = new Map();
+function renderPins() {
+  const layer = $("pins"), id = deck.slides[cur]?.id;
+  layer.innerHTML = ""; $("fb-show").innerHTML = "";
+  if (!id || (fbp.hidden && !rec)) return;
+  let spare = 0, n = 0, found = false; const placed = [], cards = [];
+  for (const s of sessions) for (const t of s.tasks) {
+    if (t.slide !== id || t.closed) continue;
+    const key = `${s.id}/${t.name}`;
+    // No stroke: in a row along the top edge, above the title (the right edge is under the panel)
+    let x = box.x + (t.at ? t.at[0] : 90 + 34 * spare++) * box.s; const y = box.y + (t.at ? t.at[1] : 26) * box.s;
+    while (placed.some(([px, py]) => Math.abs(px - x) < 24 && Math.abs(py - y) < 24)) x += 26;
+    placed.push([x, y]);
+    const pin = document.createElement("button");
+    // A question from Claude is a "?" with a turning ring: it waits for the user's answer
+    pin.className = `ck-dot fb-pin ${t.state} ${t.state === "Ask" ? "todo" : ""} ${openPin === key ? "open" : ""}`;
+    pin.style.left = x + "px"; pin.style.top = y + "px"; pin.textContent = t.state === "Ask" ? "?" : ++n; pin.title = t.text;
+    pin.onclick = () => { openPin = openPin === key ? null : key; renderPins(); };
+    layer.append(pin);
+    if (openPin !== key || rec) continue;
+    found = true;
+    for (const pts of t.strokes) $("fb-show").appendChild(document.createElementNS("http://www.w3.org/2000/svg", "polyline"))
+      .setAttribute("points", (pts.length > 1 ? pts : [pts[0], pts[0]]).join(" "));
+    cards.push(pinCard(s, t, key, x, y, t.state === "Ask" ? "?" : n));
+  }
+  if (!found && !rec) openPin = null;
+  layer.append(...cards); // above every pin
+  renderDsl(); // the DSL view follows the open pin
+}
+
+function pinCard(s, t, key, x, y, num) {
+  const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+  const card = el("div", "ck-card fb-card " + t.state), bubble = el("div", "ck-bubble"), top = el("div", "ck-top"), close = el("button", "ck-close", "×");
+  close.onclick = () => { openPin = null; renderPins(); };
+  top.append(el("span", "ck-verdict", `${num} · ${TASK[t.state] || t.state}`), close);
+  bubble.append(top, el("p", "ck-note", t.text));
+  if (t.heard.length) bubble.append(el("p", "ck-claim", `“${t.heard.join(" ")}”`));
+  card.append(bubble);
+  if (t.replies.length || t.follows.length) {
+    const thread = el("div", "ck-thread");
+    for (const text of t.replies) { const m = el("div", "ck-msg"); m.append(el("b", "", "You"), text); thread.append(m); }
+    for (const f of t.follows) { const m = el("div", "ck-msg"); m.append(el("b", "", "You"), `Follow-up recorded ${f.slice(6, 8)}/${f.slice(4, 6)} ${f.slice(9, 11)}:${f.slice(11, 13)}`); thread.append(m); }
+    card.append(thread);
+  }
+  const form = el("form", "ck-reply"), ta = el("textarea"), row = el("div", "row");
+  // A question is answered by voice (and strokes) or in writing; the same two ways come back to any other task
+  const ask = t.state === "Ask";
+  const remove = el("button", "btn", "Remove pin"), record = el("button", "btn" + (ask ? " primary" : ""), ask ? "● Answer by voice" : "Record a follow-up"), send = el("button", "btn" + (ask ? "" : " primary"), "Send");
+  remove.type = record.type = "button"; send.type = "submit";
+  record.title = "Speak, and draw on the slide if it helps; R (or Stop) sends it to Claude";
+  ta.placeholder = ask ? "Or type your answer." : "More about this, e.g. smaller, or more to the left. Claude takes the task again.";
+  ta.value = pinDrafts.get(key) || ""; ta.oninput = () => pinDrafts.set(key, ta.value);
+  ta.onkeydown = e => { if ((e.metaKey || e.ctrlKey) && e.key === "Enter") { e.preventDefault(); form.requestSubmit(); } };
+  const act = async body => {
+    try {
+      await api(`/api/feedback/${s.id}/task/${t.name}`, { method: "POST", body });
+      pinDrafts.delete(key); if (body.close) openPin = null;
+      document.activeElement?.blur(); await loadFeedback();
+    } catch (e) { ta.placeholder = "Error: " + e.message; }
+  };
+  remove.onclick = () => act({ close: true });
+  record.onclick = () => startFeedback({ session: s.id, task: t.name, ask, text: t.text });
+  form.onsubmit = e => { e.preventDefault(); if (ta.value.trim()) act({ reply: ta.value }); else ta.focus(); };
+  row.append(remove, record, send); form.append(el("label", "", ask ? "Your answer" : "Come back to it"), ta, row); card.append(form);
+  // Below the pin, kept inside the stage
+  card.style.left = Math.max(8, Math.min(x - 24, stage.clientWidth - 348)) + "px";
+  card.style.top = (y + 18) + "px";
+  requestAnimationFrame(() => {
+    const over = card.offsetTop + card.offsetHeight - (stage.clientHeight - 8);
+    if (over > 0) card.style.top = Math.max(8, card.offsetTop - over) + "px";
+  });
+  return card;
+}
+
+// What happens now, bottom left, with Clawd playing the stage: the user's own recording (listening), the save
+// (writing down), then Claude's run (the server pushes its stage and one line at each step), and its last sentence
+// when the run ends: 12 s (a question or an error: 30 s).
+const CLAWD = ["listening", "transcribing", "reading", "looking", "tasks", "working", "checking", "done", "error", "ask"];
+let caShown = "", caLine = "", claudeWas = false, caHide, fbHandoff = 0; // fbHandoff: a session was saved, Claude starts soon
+let caClosed = false, caRun = 0; // closed with the cross: stays away until the next recording or the next run (caRun: the run last seen)
+$("ca-img").onerror = () => $("claude-at").classList.add("plain");
+$("ca-close").onclick = () => { caClosed = true; clearTimeout(caHide); $("claude-at").hidden = true; caShown = caLine = ""; };
+// Where Claude works: a frame on the stage when it is on the slide shown, its thumbnail in the overview, and a
+// button in the popup to go there
+function markWork() {
+  const id = claude.running && claude.slide, i = id ? deck.slides.findIndex(s => s.id === id) : -1;
+  $("cw").hidden = !(i >= 0 && i === cur) || !!rec;
+  $("ca-goto").hidden = !(i >= 0 && i !== cur); if (i >= 0) $("ca-goto").textContent = `→ Slide ${i + 1}`;
+  document.querySelectorAll(".thumb").forEach((t, k) => t.classList.toggle("claude", k === i));
+}
+$("ca-goto").onclick = () => { const i = deck.slides.findIndex(s => s.id === claude.slide); if (i >= 0) { toggleOverview(false); show(i); } };
+
+// The review: what Claude changed since the user last looked (GET /api/claude/review). It opens when a run ends
+// with changes (not while recording), and from the popup's and the panel's "Review". Later: it stays; Done: seen.
+let review = null, reviewShow = () => {}; // reviewShow(0 | 1): the view of the slide in review shows it before or after
+async function openReview() {
+  review = await api("/api/claude/review").catch(() => null);
+  if (!review?.slides.length) return;
+  $("rv-title").textContent = `Claude changed ${review.slides.length === 1 ? "one slide" : review.slides.length + " slides"}`;
+  $("rv-count").replaceChildren(...diffCount(review.add, review.del));
+  $("rv-list").hidden = review.slides.length < 2;
+  if (!$("review").open) $("review").showModal();
+  reviewSlide(0);
+}
+const diffCount = (add, del) => { const el = (cls, t) => { const e = document.createElement("span"); e.className = cls; e.textContent = t; return e; }; return [el("ca-add", "+" + add), " ", el("ca-del", "−" + del)]; };
+function reviewSlide(n) {
+  const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+  const s = review.slides[n], name = x => x.id ? `${x.number ? x.number + " · " : ""}${x.title}` : "Deck (order, title)";
+  $("rv-list").replaceChildren(...review.slides.map((x, k) => {
+    const b = el("button", k === n ? "on" : ""), count = el("small"); count.append(x.created ? "new · " : x.removed ? "removed · " : "", ...diffCount(x.add, x.del));
+    b.append(el("span", "", name(x)), count); b.onclick = () => reviewSlide(k); return b;
+  }));
+  const body = $("rv-body"); body.replaceChildren(el("b", "", name(s)));
+  if (s.visual) {   // the slide in one view, as it was or as it is now: one toggle (click, or Space) switches. Both are loaded: the switch is instant
+    const view = el("div", "rv-view"), bar = el("div", "rv-switch"), frame = el("div", "rv-frame"), t = Date.now(), layers = [];
+    const labels = [el("span", "", "Before"), el("span", "", "After")], toggle = el("button", "rv-toggle");
+    toggle.setAttribute("role", "switch"); toggle.title = "Before / After (Space)";
+    for (const [src, none] of [[`/render/${s.id}?before=1&t=${t}${Q}`, s.created && "New slide: there was none"], [`/render/${s.id}?t=${t}${Q}`, s.removed && "This slide was removed"]]) {
+      const layer = none ? el("div", "", none) : el("iframe"); if (!none) { layer.src = src; layer.tabIndex = -1; }
+      layers.push(layer); frame.append(layer);
+    }
+    reviewShow = k => { layers.forEach((l, i) => l.classList.toggle("off", i !== k)); labels.forEach((l, i) => l.classList.toggle("on", i === k)); toggle.setAttribute("aria-checked", String(k === 1)); toggle.focus(); };
+    toggle.onclick = () => reviewShow(toggle.getAttribute("aria-checked") === "true" ? 0 : 1);
+    labels.forEach((l, i) => l.onclick = () => reviewShow(i));
+    bar.append(labels[0], toggle, labels[1], el("small", "", "Space switches"));
+    view.append(bar, frame); body.append(view);
+    requestAnimationFrame(() => { view.querySelectorAll("iframe").forEach(f => f.style.transform = `scale(${f.parentNode.clientWidth / 1280})`); reviewShow(1); });
+  }
+  for (const f of s.files) {   // the changed lines of each file
+    const fold = el("details", "rv-file"), head = el("summary"), pre = el("pre");
+    head.append(f.file + "  ", ...diffCount(f.add, f.del)); fold.open = f.hunks.length <= 60;
+    for (const [kind, line] of f.hunks) pre.append(el("div", { "+": "a", "-": "d", "…": "g" }[kind] || "", kind === "…" ? "  ⋯" : kind + " " + line));
+    fold.append(head, pre); body.append(fold);
+  }
+  body.scrollTop = 0;
+}
+$("rv-later").onclick = () => $("review").close();
+$("rv-done").onclick = async () => { await api("/api/claude/review", { method: "DELETE" }).catch(() => {}); $("review").close(); loadFeedback(); };
+$("ca-review").onclick = openReview;
+addEventListener("resize", () => $("review").querySelectorAll("iframe").forEach(f => f.style.transform = `scale(${f.parentNode.clientWidth / 1280})`));
+
+// Interrupt Claude: the popup's and the panel's Stop. The server kills the run and marks its tasks as stopped.
+const stopClaude = () => { $("ca-stop").textContent = "Stopping…"; api("/api/claude/stop", { method: "POST" }).catch(() => {}); };
+$("ca-stop").onclick = stopClaude;
+// ▴ opens the run in detail; open, the popup stays after the run. Closed again after a run, the popup leaves in 4 s.
+let caOpen = false;
+$("ca-more").onclick = () => {
+  caOpen = !caOpen; $("ca-more").textContent = caOpen ? "▾" : "▴";
+  if (caOpen) { clearTimeout(caHide); $("ca-timer").classList.remove("on"); } else if (!claude.running && !rec && !fbSaving) hideClawd(4000);
+  renderRun(true);
+};
+// The lines Claude added and removed (popup), and the detail: per file, then the log of the run
+function renderRun(toEnd) {
+  const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+  const count = (add, del) => [el("span", "ca-add", "+" + add), " ", el("span", "ca-del", "−" + del)];
+  const diff = claude.diff || { files: [], add: 0, del: 0 }, box = $("ca-detail");
+  $("ca-diff").replaceChildren(...(diff.add || diff.del ? count(diff.add, diff.del) : []));
+  box.hidden = !caOpen; if (!caOpen) return;
+  const end = toEnd || box.scrollTop + box.clientHeight > box.scrollHeight - 30; // follows the run unless the user scrolled up
+  box.replaceChildren(...diff.files.map(([file, add, del]) => { const row = el("div", "file"), n = el("span"); n.append(...count(add, del)); row.append(el("span", "", file), n); return row; }),
+    ...(claude.log || []).map(l => { const row = el("div", l.kind); row.append(el("time", "", `${Math.floor(l.t / 60000)}:${String(Math.floor(l.t / 1000) % 60).padStart(2, "0")}`), el("span", "", l.text)); return row; }));
+  if (!box.children.length) box.append(el("div", "step", "")).lastChild.textContent = "Nothing yet: the log starts with Claude's next run.";
+  if (end) box.scrollTop = box.scrollHeight;
+}
+function showClawd(stage, step, task = "") {
+  const at = $("claude-at"), again = el => { el.classList.remove("pop", "line"); void el.offsetWidth; };
+  if (caClosed) return;
+  clearTimeout(caHide); at.classList.remove("out"); $("ca-timer").classList.remove("on");
+  if (at.hidden) for (const name of CLAWD) new Image().src = `/public/assets/clawd/${name}.gif`; // no blank frame at the next stage
+  at.hidden = false;
+  if (stage !== caShown) {
+    caShown = stage;
+    at.className = "claude-at " + stage + (at.classList.contains("plain") ? " plain" : "");
+    $("ca-img").src = `/public/assets/clawd/${stage}.gif`;
+    again($("ca-clawd")); $("ca-clawd").classList.add("pop");
+  }
+  if (step !== caLine) { caLine = step; again($("ca-say")); $("ca-say").classList.add("line"); }
+  $("ca-step").textContent = step; $("ca-task").textContent = task;
+}
+function hideClawd(after, timed = true) { // timed: the bar shows the time left
+  clearTimeout(caHide);
+  if (caOpen) return; // the detail is open: the popup stays
+  if (after && timed) { const bar = $("ca-timer"); bar.classList.remove("on"); void bar.offsetWidth; bar.style.setProperty("--t", after + "ms"); bar.classList.add("on"); }
+  caHide = setTimeout(() => { $("claude-at").classList.add("out"); caHide = setTimeout(() => { $("claude-at").hidden = true; caShown = caLine = ""; }, 300); }, after);
+}
+// Claude's voice (the panel's "Voice" switch): the sentence that ends a run, and each new question, read aloud by
+// the browser with a French voice of this computer. Never while recording: the microphone would hear it and Whisper
+// would write it down as the user's words. What ends meanwhile is said when the recording stops.
+let voiceOn = false, voiceSeen = null, voiceQueue = [], fbLoaded = false;
+try { voiceOn = !!localStorage.getItem("ks-voice"); } catch {}
+// Who speaks. The presenter open on the computer that serves it (localhost): that Mac or Windows PC, with its system
+// voice (POST /api/say; on a Mac a Siri voice chosen in System Settings is used, and a browser cannot use one). Open from another
+// device: the browser, with a French voice of that device only. Chrome also has "Google français", which is ready
+// first and would be used when no voice is named, but it sends the text to Google. The device's voices arrive a
+// moment after the first request: they are asked for when the page opens, and a sentence waits for them (2 s at
+// most; none: it is not said).
+const sayHere = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
+let voices = speechSynthesis.getVoices(), voiceName = "";
+speechSynthesis.addEventListener("voiceschanged", () => voices = speechSynthesis.getVoices());
+const voiceIs = name => { if (voiceName !== name) { voiceName = name; if (!fbp.hidden) renderFeedback(); } }; // the panel shows which voice speaks
+async function speak(text) {
+  text = text.replace(/`/g, "").replace(/\b\w+::(\w+)/g, "$1");
+  voiceSaying++;
+  if (sayHere && (await api("/api/say", { method: "POST", body: { text } }).catch(() => ({}))).ok) return voiceIs(MAC ? "Mac" : "Windows");
+  browserSpeak(text);
+}
+function browserSpeak(text, tries = 0) {
+  const rank = v => /premium|enhanced|siri/i.test(v.name) ? 0 : /thomas/i.test(v.name) ? 1 : /am[ée]lie|jacques/i.test(v.name) ? 2 : 3; // a downloaded voice first, then the classic ones
+  const voice = voices.filter(v => /^fr/i.test(v.lang) && v.localService).sort((a, b) => rank(a) - rank(b))[0];
+  if (!voice) return tries < 7 ? setTimeout(() => browserSpeak(text, tries + 1), 300) : (voiceEvent({ end: true }), console.warn("No French voice on this device: nothing is said"));
+  const u = new SpeechSynthesisUtterance(text);
+  u.onstart = () => voiceEvent({ start: true, ms: text.length * 70 }); // a browser does not say how long: about 70 ms a letter
+  u.onend = u.onerror = () => voiceEvent({ end: true, more: speechSynthesis.pending });
+  u.voice = voice; u.lang = voice.lang; u.rate = 1.05;
+  speechSynthesis.speak(u); voiceIs(voice.name);
+}
+function hush() { voiceSaying = 0; speechSynthesis.cancel(); if (sayHere) api("/api/say", { method: "POST", body: { stop: true } }).catch(() => {}); }
+// The popup follows the voice: its bar shrinks over each sentence (the server, or the browser, says how long it is)
+// and the popup leaves when the last one ends.
+let caSpeaking = false, voiceSaying = 0; // the popup waits for the voice; sentences sent and not said yet
+function voiceEvent(v) {
+  if (v.end) voiceSaying = Math.max(0, voiceSaying - 1);
+  if (!caSpeaking) return;
+  if (v.start) { clearTimeout(caHide); const bar = $("ca-timer"); bar.classList.remove("on"); void bar.offsetWidth; bar.style.setProperty("--t", v.ms + "ms"); bar.classList.add("on"); }
+  if (v.end && !v.more && !voiceSaying) { caSpeaking = false; $("ca-timer").classList.remove("on"); hideClawd(600, false); }
+}
+function claudeSays() {
+  const asks = sessions.flatMap(s => s.tasks.filter(t => t.state === "Ask" && !t.closed).map(t => [`${s.id}/${t.name}`, t.text]));
+  if (!fbLoaded) return;
+  if (!voiceSeen) return voiceSeen = { at: claude.last?.at, asks: new Set(asks.map(a => a[0])) }; // what was there when the page opened is not said
+  if (!claude.running && claude.last?.at && claude.last.at !== voiceSeen.at) { voiceSeen.at = claude.last.at; voiceQueue.push((claude.last.ok ? "" : "Il y a eu une erreur. ") + claude.last.text); }
+  for (const [key, text] of asks) if (!voiceSeen.asks.has(key)) { voiceSeen.asks.add(key); voiceQueue.push("J'ai une question. " + text); }
+  if (!voiceOn) return voiceQueue = [];
+  if (!rec && !fbSaving) for (const text of voiceQueue.splice(0)) speak(text);
+}
+function renderClaude() {
+  const tasks = sessions.flatMap(s => s.tasks).filter(t => !t.closed);
+  $("ca-stop").hidden = !claude.running; if (!claude.running) $("ca-stop").textContent = "■ Stop";
+  $("ca-review").hidden = !!claude.running || !claude.changed; markWork();
+  claudeSays(); renderRun();
+  $("b-talk").firstChild.data = rec ? "● Stop" : "Talk to Claude";
+  if (claude.running) fbHandoff = 0;
+  if (claude.running && claude.running !== caRun) { caRun = claude.running; caClosed = false; }
+  // An answer or a follow-up: the question or the task stays in view, its pin's card is closed while recording
+  if (rec) return showClawd("listening", rec.about?.ask ? "Listening: answer, then R" : rec.about ? "Listening: more about this task, then R" : "Listening: draw and speak",
+    rec.about ? rec.about.text : claude.running ? `Claude · ${claude.step || "starting"}…` : "N: a new slide after this one · R: send");
+  if (fbSaving) return showClawd("transcribing", "Writing down what you said…");
+  if (claude.running) {
+    claudeWas = true;
+    return showClawd(claude.stage || "reading", (claude.step || "Starting") + "…" + (claude.model === "opus" ? " · Opus" : "") + (claude.queued ? " · more feedback waiting" : ""), tasks.find(t => t.state === "Doing")?.text);
+  }
+  if (claudeWas) {
+    claudeWas = false;
+    const failed = claude.last?.ok === false, ask = !failed && tasks.find(t => t.state === "Ask");
+    showClawd(failed ? "error" : ask ? "ask" : "done", claude.last ? (failed ? "Error: " : "") + claude.last.text : "Done", ask ? "Question: " + ask.text : "");
+    if (claude.changed && !claude.queued) openReview();
+    // Voice on: the popup stays while Claude speaks, its bar follows the voice (voiceEvent). No voice in 6 s: the usual time.
+    if (voiceOn && voiceQueue.length + voiceSaying) { caSpeaking = true; clearTimeout(caHide); $("ca-timer").classList.remove("on"); caHide = setTimeout(() => { caSpeaking = false; hideClawd(12000); }, 6000); return; }
+    return hideClawd(failed || ask ? 30000 : 12000);
+  }
+  if (Date.now() - fbHandoff < 20000) return showClawd("transcribing", "Sending to Claude…");
+  if (/^(listening|transcribing)$/.test(caShown)) hideClawd(0);
+}
+
+// ---------- DSL view ----------
+// Key D: the feedback language (tools/ks.mjs) as it is written. While recording: the saved parts of this recording
+// (their files, with what was heard) and the part in progress, line by line as the user draws. Else: the session of
+// the open pin, or of the last recording, or the latest one; Claude's Task lines appear as it writes them.
+// The first use of each type is preceded by its signature.
+let ks = null, dslOn = false, dslFrame = 0, dslRec = [], dslCount = 0; // ks: the language's tables; dslRec: the sessions of the last recording
+const dslFiles = new Map(); // session → the text of its feedback.ks
+const dslView = () => openPin && !rec ? [openPin.split("/")[0]] : dslRec.length || rec ? dslRec : sessions[0] ? [sessions[0].id] : [];
+async function loadDsl(ids) {
+  ks ||= await api("/api/ks").catch(() => ({ STATEMENTS: {} }));
+  for (const id of ids) dslFiles.set(id, await fetch(`/deck/feedback/${id}/feedback.ks`).then(r => r.ok ? r.text() : "// no file").catch(() => "// no file"));
+  renderDsl();
+}
+// The part in progress, as the server will write it (same lines as POST /api/feedback)
+function fbLines(events) {
+  const out = [], q = v => JSON.stringify(String(v ?? "")); let e = 0, s = 0, t = 0, u = 0;
+  for (const ev of events) {
+    if (ev.type === "enter") out.push(`Enter e${++e}(Time(${ev.t}), ${q(ev.slide)});`);
+    if (ev.type === "stroke") {
+      out.push(`Stroke s${++s}(Kind::${ev.kind}, Color::Red, Span(${ev.span.join(", ")}), ${ev.points.map(p => `Point(${p.join(", ")})`).join(", ")});`);
+      for (const o of ev.targets) out.push(`Target t${++t}(s${s}, ${q(o.el)}, ${q(o.text)});`);
+    }
+    if (ev.type === "undo") out.push(`Undo u${++u}(Time(${ev.t}), s${ev.stroke});`);
+  }
+  return out;
+}
+function dslRow(text) {
+  const row = document.createElement("div"), add = (cls, t) => { const sp = document.createElement("span"); if (cls) sp.className = cls; sp.textContent = t; row.append(sp); };
+  if (text.startsWith("//")) { row.className = "c"; row.textContent = text; return row; }
+  // A long stroke: its first two points and its last one
+  text = text.replace(/((?:Point\(\d+, \d+\), ){2})((?:Point\(\d+, \d+\), )+)/, (m, a, mid) => `${a}… +${mid.split("Point").length - 1} points, `);
+  const m = text.match(/^([A-Z]\w*) (\w+)/); let i = 0;
+  if (m) { add("st", m[1]); add("", " "); add("nm", m[2]); i = m[0].length; }
+  const re = /"(?:[^"\\]|\\.)*"|[A-Z]\w*::\w+|[A-Z]\w*(?=\()|(?<!\w)-?\d+(?:\.\d+)?|… \+\d+ points|\b[a-z]\w*\b/g; re.lastIndex = i;
+  for (let k; (k = re.exec(text));) {
+    if (k.index > i) add("", text.slice(i, k.index));
+    const t = k[0]; add(t[0] === '"' ? "s" : t.includes("::") ? "en" : /^[A-Z]/.test(t) ? "vt" : t[0] === "…" ? "c" : /^[a-z]/.test(t) ? "nm" : "n", t); i = re.lastIndex;
+  }
+  if (i < text.length) add("", text.slice(i));
+  return row;
+}
+function renderDsl() {
+  const box = $("dsl"); if (!dslOn) return;
+  const ids = dslView(), missing = ids.filter(id => !dslFiles.has(id));
+  if (missing.length || !ks) { loadDsl(missing); if (!ks) return; }
+  const lines = [];
+  for (const id of ids) lines.push(`// feedback/${id}/feedback.ks`, ...(dslFiles.get(id) || "// reading…").trim().split("\n"));
+  if (rec) {
+    lines.push(`// slide ${rec.slide}: not saved yet`, ...fbLines(rec.events));
+    if (rec.stroke) lines.push(`// drawing a stroke: ${rec.stroke.pts.length} points since ${rec.stroke.t0} ms`);
+    lines.push("// Say lines: written when you leave the slide or stop (the voice is transcribed then)");
+  } else if (!ids.length) lines.push("// no feedback yet: press R, draw on the slides and speak");
+  const seen = new Set(), sig = type => `${type}(${ks.STATEMENTS[type].join(", ")})`;
+  box.innerHTML = "";
+  for (const text of lines) {
+    const type = text.match(/^([A-Z]\w*) /)?.[1];
+    if (type && ks.STATEMENTS[type] && !seen.has(type)) { seen.add(type); const row = dslRow("// " + sig(type)); row.className = "c sig"; box.append(row); }
+    box.append(dslRow(text));
+  }
+  // New lines flash, and the view follows them
+  if (lines.length > dslCount) for (const row of [...box.children].slice(dslCount - lines.length)) if (!row.classList.contains("c")) row.classList.add("new");
+  if (lines.length !== dslCount || rec) box.scrollTop = box.scrollHeight;
+  dslCount = lines.length;
+}
+function toggleDsl(force) {
+  dslOn = force === undefined ? !dslOn : force;
+  $("dsl").hidden = !dslOn; document.body.classList.toggle("dsl-on", dslOn);
+  try { localStorage.setItem("ks-dsl", dslOn ? "1" : ""); } catch {}
+  dslCount = 0; renderDsl();
+}
+
+function toggleTasks(force) {
+  fbp.hidden = force === undefined ? !fbp.hidden : !force;
+  document.body.classList.toggle("tasks", !fbp.hidden);
+  try { localStorage.setItem("ks-tasks", fbp.hidden ? "" : "1"); } catch {}
+  if (!fbp.hidden) loadFeedback(); else renderPins();
+}
+
+// ---------- Overview ----------
+function buildOverview() {
+  const g = $("ov-grid"); g.innerHTML = "";
+  deck.slides.forEach((s, k) => {
+    const b = document.createElement("button"); b.className = "thumb" + (k === cur ? " on" : "");
+    const f = document.createElement("iframe"); f.src = `/render/${s.id}?x=1${Q}`; f.loading = "lazy"; f.tabIndex = -1;
+    const todo = s.brief.status === "todo" || !s.styled;
+    const missing = LANG === "en" && s.styled && !s.en, outdated = LANG === "en" && s.styled && s.enOutdated;
+    const cap = document.createElement("span"); cap.className = "cap";
+    cap.innerHTML = `<span></span><span class="${todo || missing || outdated ? "todo" : ""}">${todo ? "To style" : missing ? "Not translated" : outdated ? "Translation outdated" : ""}</span>`;
+    cap.firstChild.textContent = `${k + 1}. ${s.brief.title || s.id}`;
+    b.append(f, cap);
+    b.onclick = () => { toggleOverview(false); show(k); };
+    g.append(b);
+  });
+  requestAnimationFrame(() => document.querySelectorAll(".thumb").forEach(t => t.firstChild.style.transform = `scale(${t.clientWidth / 1280})`));
+  markWork();
+}
+// The other decks of this server (keystone.json), each on its own port of the same host
+async function buildDecks() {
+  const nav = $("ov-decks");
+  const { current, decks } = await api("/api/decks" + (LANG === "en" ? "?lang=en" : "")).catch(() => ({ decks: [] }));
+  nav.hidden = false; nav.innerHTML = "";
+  // "+ New deck": asks for a title and a style guide (those of library/styles), creates decks/<id>/ with a cover
+  // slide to style, and opens it
+  const add = document.createElement("button"); add.textContent = "+ New deck";
+  add.onclick = async () => {
+    const { styles } = await api("/api/styles").catch(() => ({ styles: [] })), box = $("nd-styles");
+    box.replaceChildren(box.firstElementChild, ...styles.map((g, i) => {
+      const row = document.createElement("label"), radio = document.createElement("input"), name = document.createElement("b"), about = document.createElement("span");
+      row.className = "style"; radio.type = "radio"; radio.name = "nd-style"; radio.value = g.id; radio.checked = g.default || (!i && !styles.some(x => x.default));
+      name.textContent = g.name + (g.default ? " (default)" : ""); about.textContent = g.about;
+      row.append(radio, name, about); return row;
+    }));
+    $("nd-title").value = ""; $("new-deck").returnValue = ""; $("new-deck").showModal();
+  };
+  $("new-deck").onclose = async () => {
+    const title = $("nd-title").value.trim(); if ($("new-deck").returnValue !== "create" || !title) return;
+    try {
+      const d = await api("/api/decks", { method: "POST", body: { title, style: document.querySelector("input[name=nd-style]:checked")?.value } });
+      location.href = `${location.protocol}//${location.hostname}:${d.port}/`;
+    } catch (e) { alert("The deck was not created: " + e.message); }
+  };
+  for (const d of decks) {
+    const a = document.createElement("a");
+    a.textContent = d.title; a.className = d.id === current ? "on" : "";
+    a.href = d.id === current ? "#" + (cur + 1) : `${location.protocol}//${location.hostname}:${d.port}/${location.search}`;
+    if (d.id === current) a.onclick = e => { e.preventDefault(); toggleOverview(false); };
+    nav.append(a);
+  }
+  nav.append(add);
+}
+function toggleOverview(force) {
+  const o = $("overview"); o.hidden = force === undefined ? !o.hidden : !force;
+  if (!o.hidden) { buildOverview(); buildDecks(); } else $("ov-grid").innerHTML = "";
+}
+
+// ---------- Input ----------
+function onKey(e) {
+  if (document.querySelector("dialog[open]")) return; // the review or "New deck" is open: its own keys only
+  if (rec && (e.metaKey || e.ctrlKey) && e.key === "z") { e.preventDefault(); return fbUndo(); }
+  const typing = /^(INPUT|TEXTAREA)$/.test((e.target.ownerDocument === document ? e.target : {}).tagName || "");
+  if ((e.metaKey || e.ctrlKey) && e.key === "s") { e.preventDefault(); save(); return; }
+  if (typing) { if (e.key === "Escape") e.target.blur(); return; }
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  const k = e.key;
+  // Recording feedback: R saves, Escape (twice) discards, the slide keys still work; the rest waits for the end
+  if (rec && !/^(Arrow|Page|Home|End| )/.test(k)) { e.preventDefault(); if (k === "r" || k === "R") stopFeedback(); else if (k === "Escape") stopFeedback(false); else if (k === "d" || k === "D") toggleDsl(); else if (k === "n" || k === "N") addSlide(); return; }
+  if (["ArrowRight", "ArrowDown", "PageDown", " "].includes(k)) { e.preventDefault(); step(1); }
+  else if (["ArrowLeft", "ArrowUp", "PageUp"].includes(k)) { e.preventDefault(); step(-1); }
+  else if (k === "Home") show(0);
+  else if (k === "End") show(deck.slides.length - 1);
+  else if (k === "e" || k === "E") { e.preventDefault(); toggleEditor(); }
+  else if (k === "o" || k === "O") toggleOverview();
+  else if (k === "f" || k === "F") fullscreen();
+  else if (k === "l" || k === "L") switchLang();
+  else if (k === "r" || k === "R") startFeedback();
+  else if (k === "t" || k === "T") toggleTasks();
+  else if (k === "d" || k === "D") toggleDsl();
+  else if (k === "Escape") { toggleOverview(false); if (openPin) { openPin = null; renderPins(); } }
+}
+document.addEventListener("keydown", onKey);
+function fullscreen() {
+  if (document.fullscreenElement) document.exitFullscreen();
+  else { toggleEditor(false); document.documentElement.requestFullscreen().catch(() => {}); }
+}
+$("b-prev").onclick = () => step(-1);
+$("b-next").onclick = () => step(1);
+$("b-ov").onclick = () => toggleOverview();
+$("b-ed").onclick = () => toggleEditor();
+$("b-fs").onclick = fullscreen;
+$("b-lang").onclick = switchLang;
+$("b-fb").onclick = () => rec ? stopFeedback() : startFeedback();
+$("b-tasks").onclick = () => toggleTasks();
+$("b-dsl").onclick = () => toggleDsl();
+$("b-lang").innerHTML = (LANG === "en" ? "<b>EN</b> · FR" : "<b>FR</b> · EN") + "<kbd>L</kbd>";
+document.documentElement.lang = LANG;
+addEventListener("resize", () => { fit(); renderChecks(); });
+addEventListener("hashchange", () => show((parseInt(location.hash.slice(1)) || 1) - 1, { fromHash: true }));
+
+let idle;
+function wake() { document.body.classList.remove("idle"); clearTimeout(idle); idle = setTimeout(() => document.body.classList.add("idle"), 2200); }
+addEventListener("mousemove", wake); wake();
+
+// ---------- Live reload ----------
+const es = new EventSource("/api/events");
+es.onmessage = async ev => {
+  const { file = "", claude: now, voice } = JSON.parse(ev.data);
+  if (voice) return voiceEvent(voice); // the Mac starts or stops speaking
+  if (now) { const was = !!claude.running; claude = now; if (was !== !!now.running && !fbp.hidden) renderFeedback(); return renderClaude(); } // a step of Claude's run (the panel's Stop comes and goes with it)
+  if (/^feedback[\\/]/.test(file)) { if (dslOn) loadDsl(dslView()); return loadFeedback(); } // a session or its tasks: only the panels change
+  const prevOrder = deck.slides.map(s => s.id).join();
+  await loadDeck();
+  const id = file.split(/[\\/]/)[0];
+  if (/checks\.json$/.test(file)) return; // bubbles were refreshed by loadDeck()
+  if (file === "deck.json" || deck.slides.map(s => s.id).join() !== prevOrder) return;
+  if (frames.has(id)) reloadFrame(id);
+  else if (!frames.has(id)) for (const s of deck.slides) reloadFrame(s.id); // theme or asset change
+};
+
+cur = (parseInt(location.hash.slice(1)) || 1) - 1;
+loadDeck();
+try { toggleTasks(!!localStorage.getItem("ks-tasks")); toggleDsl(!!localStorage.getItem("ks-dsl")); } catch {}
+loadFeedback();
+</script>
+</body>
+</html>

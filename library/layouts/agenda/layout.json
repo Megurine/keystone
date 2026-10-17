@@ -1,0 +1,25 @@
+{
+  "id": "agenda",
+  "kind": "layout",
+  "use": "Table of contents of the talk",
+  "avoid": "Anything but the chapter list",
+  "body": "",
+  "slots": {
+    "title": {
+      "class": "sa-title",
+      "required": true,
+      "notes": "Sommaire"
+    },
+    "chapters": {
+      "class": "sa-agenda",
+      "required": true,
+      "min": 3,
+      "max": 6,
+      "notes": "li > span number + div > h3 (+em) + p"
+    }
+  },
+  "components": [
+    "anim"
+  ],
+  "example": "agenda"
+}

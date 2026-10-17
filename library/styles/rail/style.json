@@ -1,0 +1,13 @@
+{
+  "id": "rail",
+  "kind": "style",
+  "default": true,
+  "css": "/public/theme.css",
+  "requires": {
+    "content": ["header.sa-head > img.sa-logo + h1.sa-band", "h2.sa-title"],
+    "cover": ["<!-- body: sa-cover --> on the first line"]
+  },
+  "example": "style-rail",
+  "media": ["assets/media/cover.webp"],
+  "rail": { "width": 46, "colour": "--red", "chapter": { "class": "sa-band", "case": "upper", "orientation": "upright" } }
+}

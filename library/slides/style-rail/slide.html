@@ -1,0 +1,58 @@
+<header class="sa-head"><img class="sa-logo" src="/public/assets/brand/sa-monogram-white.svg" alt=""><h1 class="sa-band">STYLE</h1></header>
+<script src="/public/components/anim.js"></script>
+<h2 class="sa-title" data-in="100">Le style Rail</h2>
+<p class="sa-lead" data-in="200">Un rail rouge à gauche, un titre blanc, des <b>termes en gras</b> et <span>une seule idée en rouge</span>.</p>
+
+<ul class="sa-list is-placed sr-list">
+  <li data-in="400">Un point de liste, carré rouge</li>
+  <li class="pro" data-in="500">Un avantage</li>
+  <li class="con" data-in="600">Un inconvénient <em>(avec un aparté gris)</em></li>
+</ul>
+
+<div class="sr-type" data-in="800">
+  <p class="sa-label is-marked">Typographie</p>
+  <p class="sa-heading">Poppins pour les titres</p>
+  <p class="sr-body">Helvetica pour le texte</p>
+  <p class="sa-caption">SF Mono pour les labels et les légendes</p>
+</div>
+
+<dl class="sr-spec" data-in="900">
+  <dt class="sa-label">Rail</dt><dd class="sa-caption"><b>46&nbsp;px</b>, rouge · logo <b>28&nbsp;px</b></dd>
+  <dt class="sa-label">Chapitre</dt><dd class="sa-caption">Mono <b>14</b>, capitales, lettres droites</dd>
+  <dt class="sa-label">Titre</dt><dd class="sa-caption">Poppins 800, <b>42&nbsp;px</b>, blanc</dd>
+  <dt class="sa-label">Chapeau</dt><dd class="sa-caption"><b>26&nbsp;px</b>, interligne 1,4</dd>
+  <dt class="sa-label">Texte, listes</dt><dd class="sa-caption"><b>24&nbsp;px</b> · puce carrée <b>12&nbsp;px</b></dd>
+  <dt class="sa-label">Labels, légendes</dt><dd class="sa-caption">Mono <b>12</b> capitales · mono <b>14</b></dd>
+  <dt class="sa-label">Filets, marges</dt><dd class="sa-caption"><b>1&nbsp;px</b> · contenu de <b>73</b> à <b>1207</b></dd>
+</dl>
+
+<div class="sr-palette" data-in="1100">
+  <p class="sa-label is-marked">Couleurs</p>
+  <ul>
+    <li><i style="background: var(--ink)"></i>ink</li>
+    <li><i style="background: var(--ink-2)"></i>ink-2</li>
+    <li><i style="background: var(--ink-3)"></i>ink-3</li>
+    <li><i style="background: var(--rule)"></i>rule</li>
+    <li><i style="background: var(--dim)"></i>dim</li>
+    <li><i style="background: var(--gray)"></i>gray</li>
+    <li><i style="background: var(--field)"></i>field</li>
+    <li><i style="background: var(--light)"></i>light</li>
+    <li><i style="background: var(--white)"></i>white</li>
+    <li><i style="background: var(--red)"></i>red</li>
+  </ul>
+</div>
+
+<p class="sa-takeaway" data-in="1400">Le rouge reste rare&nbsp;: <span>une seule idée par slide</span>.</p>
+
+<style>
+  /* Left: the style in use. Right: its values. Positions only: every look comes from the theme. */
+  .sr-list { right: auto; width: 500px; }
+  .sr-type { position: absolute; left: 73px; top: 440px; width: 500px; display: grid; gap: 12px; }
+  .sr-body { margin: 0; font-size: 24px; line-height: 1.35; }
+  .sr-spec { position: absolute; left: 640px; top: 262px; width: 567px; margin: 0; display: grid; grid-template-columns: 190px 1fr; }
+  .sr-spec dt, .sr-spec dd { margin: 0; padding: 7px 0; line-height: 19px; border-bottom: 1px solid var(--rule); }
+  .sr-palette { position: absolute; left: 640px; top: 508px; width: 567px; display: grid; gap: 12px; }
+  .sr-palette ul { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(10, 1fr); gap: 8px; font: 500 12px/1 var(--mono); color: var(--gray); }
+  .sr-palette li { display: grid; gap: 8px; }
+  .sr-palette i { display: block; height: 36px; outline: 1px solid var(--rule-2); outline-offset: -1px; }
+</style>

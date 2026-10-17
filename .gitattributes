@@ -1,0 +1,10 @@
+# Text files keep \n on every system: slide.en.json keys must match slide.html exactly, and the tools write \n
+* text=auto eol=lf
+*.webp binary
+*.png binary
+*.jpg binary
+*.glb binary
+*.bin binary
+*.woff2 binary
+*.webm binary
+*.mp4 binary

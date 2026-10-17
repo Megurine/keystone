@@ -1,0 +1,21 @@
+{
+  "title": "Bibliothèque de styles",
+  "titleEn": "Style library",
+  "order": [
+    "cover",
+    "style-rail",
+    "agenda",
+    "chapter",
+    "list",
+    "procon",
+    "cards",
+    "intro-visual",
+    "diagram",
+    "demo",
+    "rendus",
+    "materiaux",
+    "verre",
+    "sources",
+    "closing"
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "id": "three",
+  "kind": "component",
+  "use": "Live 3D figures (three.js) in a slide",
+  "include": [
+    "<script type=\"module\">import { THREE, stage, material, applyLook, loadModel, playLoop } from \"/public/components/stage.js\";</script>"
+  ],
+  "rules": {
+    "loop": "only between sa:enter and sa:leave; one still frame at load",
+    "colours": {
+      "red": "0xee342c",
+      "ink": "0x1b1b1c",
+      "white": "0xffffff"
+    },
+    "builds": "window.saNext() / window.saPrev() return true while the slide handles the step",
+    "loadedSlides": "presenter keeps ±2 slides loaded (WebGL context limit)",
+    "looks": {
+      "unlit": "exact colours: checkers, UV views",
+      "simple": "Blinn-Phong, sky + key + rim",
+      "pbr": "Ultra HDR environment (studio | exterior), neutral tone mapping"
+    },
+    "resolution": "stage() renders at saPixelRatio() (max 2 on phones) and redraws on sa:resize",
+    "draw": "render(camera) from stage(): ambient occlusion in pbr; renderer.render() only for hand-drawn viewports",
+    "softShadow": "softShadow(floor PlaneGeometry, camera) once the scene is complete (pbr)",
+    "physical": "MeshPhysicalMaterial in pbr (glass, KHR_materials_*); GLB physical materials are kept by applyLook(model, 'pbr')",
+    "glass": "transmission refracts only opaque scene objects: backdrop(scene, camera, paint) from /public/components/backdrop.js, stage ao: false, clear: null"
+  },
+  "example": "rendus"
+}

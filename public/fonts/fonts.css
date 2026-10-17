@@ -1,0 +1,7 @@
+/* Poppins, the display face (SIL Open Font License 1.1, see OFL.txt). One file for the deck theme and the published talks (tools/deploy.mjs). */
+@font-face { font-family: "Poppins"; font-weight: 300; font-display: swap; src: url("/public/fonts/poppins-300.woff2") format("woff2"); }
+@font-face { font-family: "Poppins"; font-weight: 400; font-display: swap; src: url("/public/fonts/poppins-400.woff2") format("woff2"); }
+@font-face { font-family: "Poppins"; font-weight: 500; font-display: swap; src: url("/public/fonts/poppins-500.woff2") format("woff2"); }
+@font-face { font-family: "Poppins"; font-weight: 600; font-display: swap; src: url("/public/fonts/poppins-600.woff2") format("woff2"); }
+@font-face { font-family: "Poppins"; font-weight: 700; font-display: swap; src: url("/public/fonts/poppins-700.woff2") format("woff2"); }
+@font-face { font-family: "Poppins"; font-weight: 800; font-display: swap; src: url("/public/fonts/poppins-800.woff2") format("woff2"); }

@@ -1,0 +1,17 @@
+{
+  "id": "intro-visual",
+  "kind": "layout",
+  "use": "Introduction slides (speaker, studio, agenda) with one square visual",
+  "avoid": "Technical content: use list or canvas",
+  "body": "",
+  "slots": {
+    "chapter": { "class": "sa-band", "required": true, "case": "upper" },
+    "title":   { "class": "sa-title", "required": true, "maxChars": 40, "case": "sentence" },
+    "lead":    { "class": "sa-lead sa-intro-lead", "required": false, "maxChars": 110 },
+    "label":   { "class": "sa-intro-label", "required": false, "maxChars": 30, "case": "upper" },
+    "items":   { "class": "sa-list sa-intro-list", "required": true, "min": 2, "max": 5, "maxChars": 55 },
+    "visual":  { "class": "sa-intro-visual", "required": true, "notes": "img (photo) or div.is-brand > img wordmark" }
+  },
+  "components": ["list", "anim"],
+  "example": "intro-visual"
+}

@@ -1,0 +1,107 @@
+/* Keystone reader (talks/<slug>/, public/reader/). Self-contained: the base, rail and components it needs from the
+   website's main.css are copied below, so a published talk runs on the website and on any static host.
+   The page's rail on the left, then the whole slide, the page around it painted to match (stage.js),
+   a close cross in the slide's corner, a toolbar that fades out when the pointer rests. */
+
+@import url("/public/tokens.css");        /* colours and type */
+@import url("/public/fonts/fonts.css");   /* Poppins */
+
+:root { --rail: 56px; --pad: clamp(20px, 5vw, 80px); --gut: clamp(16px, 2vw, 32px); --ease-out: cubic-bezier(.2, .7, .1, 1); }
+
+/* Base (from the website's main.css) */
+* { box-sizing: border-box; }
+body { margin: 0; overflow-x: hidden; background: var(--ink); color: var(--white); font: 400 18px/1.45 var(--body); -webkit-font-smoothing: antialiased; }
+img { display: block; max-width: 100%; }
+a { color: inherit; }
+h2 { margin: 0 0 26px; font: 800 clamp(40px, 5vw, 76px)/1 var(--display); letter-spacing: -.015em; }
+.mono { font-family: var(--mono); font-size: 12px; letter-spacing: .12em; text-transform: uppercase; }
+.label { display: flex; align-items: center; gap: 12px; margin: 0 0 22px; color: var(--gray); }
+.label::before { content: ""; width: 12px; height: 12px; background: var(--red); }
+.button { display: inline-block; padding: 17px 28px; border: 0; background: var(--red); color: var(--white); font: 600 15px/1 var(--display); text-decoration: none; cursor: pointer; }
+.button:hover { background: var(--ink); color: var(--white); }
+.link { padding: 6px 0; border-bottom: 2px solid currentColor; text-decoration: none; }
+.link:hover { border-color: var(--red); }
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+/* Rail (from the website's main.css): logo and the current chapter, letters stacked upright */
+.rail { position: fixed; z-index: 20; top: 0; bottom: 0; left: 0; display: flex; flex-direction: column; align-items: center; gap: 26px; width: var(--rail); padding: 20px 0 22px; background: var(--red); }
+.rail-logo { display: block; width: 30px; height: 30px; overflow: hidden; transition: opacity .35s, transform .35s var(--ease-out); }
+.rail-logo img { width: 30px; height: 30px; transform: scale(1.45); }
+.rail-verb { display: flex; gap: 16px; margin: 0; font: 600 14px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; writing-mode: vertical-rl; text-orientation: upright; }
+.rail-built { opacity: .7; }
+.rail-word { display: inline-block; transition: opacity .25s, transform .25s; }
+.rail-word.is-swapping { opacity: 0; transform: translateY(-10px); }
+
+.talk-page { overflow: hidden; background: #000; }
+.talk { --stage-top: 0px; position: fixed; inset: 0; margin: 0; }   /* the stage makes room for the rail itself: drop main's left margin */
+.talk-stage { position: absolute; inset: 0 0 0 var(--rail); overflow: hidden; background: var(--ink); outline: none; }
+.talk-frame { position: absolute; top: 0; left: 0; width: 1280px; height: 720px; border: 0; transform-origin: 0 0; visibility: hidden; }
+.talk-frame.is-on { visibility: visible; }
+.talk-close { position: absolute; z-index: 2; top: calc(var(--stage-top) + var(--slide-top, 0px) + 12px); right: calc(var(--slide-right, 0px) + 12px); display: grid; place-items: center; width: 48px; height: 48px;
+  background: rgb(27 27 28 / .7); color: var(--white); font: 400 22px/1 var(--body); text-decoration: none; transition: background .2s; }
+.talk-close:hover, .talk-close:focus-visible { background: var(--red); outline: none; }
+.talk-bar { position: absolute; z-index: 2; left: 50%; bottom: 16px; display: flex; align-items: center; gap: 2px; padding: 4px;
+  transform: translateX(-50%); background: rgb(27 27 28 / .9); border: 1px solid var(--rule); transition: opacity .3s; }
+.talk-bar button, .talk-bar a { padding: 9px 12px; border: 0; background: none; color: var(--white); font: inherit; letter-spacing: inherit; text-transform: inherit; text-decoration: none; cursor: pointer; }
+.talk-bar button:hover, .talk-bar button:focus-visible, .talk-bar a:hover, .talk-bar a:focus-visible { background: var(--red); outline: none; }
+.talk-count { min-width: 8ch; padding: 0 8px; color: var(--gray); text-align: center; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.talk-bar-sep { width: 1px; height: 18px; margin: 0 4px; background: var(--rule); }
+.talk.is-idle .talk-bar, .talk.is-idle .talk-close { opacity: 0; pointer-events: none; }
+.talk-close { transition: background .2s, opacity .3s; }
+.talk-warning { position: absolute; z-index: 2; left: 16px; right: 80px; bottom: 72px; max-width: 640px; margin: 0; padding: 14px 18px;
+  border-left: 4px solid var(--red); background: rgb(27 27 28 / .92); color: var(--light); font-size: 14px; line-height: 1.5; }
+.talk-warning b { display: block; margin-bottom: 4px; color: var(--white); }
+
+/* Overview (overview.js): every slide as a thumbnail, the current one outlined in red */
+.talk-overview { position: absolute; z-index: 3; inset: 0 0 0 var(--rail); overflow: auto; padding: 72px var(--pad) 96px; background: var(--ink); }
+.talk-overview-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(220px, 100%), 1fr)); gap: var(--gut); margin: 0; padding: 0; list-style: none; }
+.talk-overview-grid button { display: block; width: 100%; padding: 0; border: 0; background: none; color: var(--gray); text-align: left; cursor: pointer; }
+.talk-overview-grid img { width: 100%; height: auto; aspect-ratio: 16 / 9; outline: 1px solid var(--rule); background: var(--ink-2); transition: outline-color .2s; }
+.talk-overview-grid .mono { display: block; margin-top: 10px; }
+.talk-overview-grid button:hover img, .talk-overview-grid button:focus-visible img { outline: 2px solid var(--white); }
+.talk-overview-grid button:focus-visible { outline: none; }
+.talk-overview-grid button.is-current img { outline: 3px solid var(--red); }
+.talk-overview-grid .is-current .mono { color: var(--red); }
+.talk-overview-end { display: grid !important; place-items: center; aspect-ratio: 16 / 9; outline: 1px solid var(--rule); background: var(--red) !important; color: var(--white) !important; }
+.talk-overview-end.is-current { outline: 3px solid var(--white); }
+.talk-overview-end:hover, .talk-overview-end:focus-visible { outline: 2px solid var(--white) !important; }
+.talk.is-overview .talk-close { opacity: 0; pointer-events: none; }
+.talk.is-overview .talk-bar { z-index: 4; opacity: 1; pointer-events: auto; }   /* stays on top: Overview closes it */
+
+/* End card (end.js): after the last slide; share / follow / work with us */
+.talk-end { position: absolute; inset: 0; display: none; padding: 0; overflow: auto; background: var(--ink); }   /* padding: not the site's section padding */
+.talk-end.is-on { display: flex; }
+.talk-end-body { flex: 1; align-self: center; max-width: 1280px; padding: 96px var(--pad) 120px; }
+.talk-end-body h2 { margin-bottom: 70px; }
+.talk-end-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--gut); border-top: 1px solid var(--rule); }
+.talk-end-grid > div { padding-top: 26px; }
+.talk-end-grid h3 { margin: 0 0 16px; color: var(--gray); font-weight: 500; }
+.talk-end-grid p { margin: 0 0 26px; max-width: 26rem; color: var(--light); }
+.talk-end-actions { display: flex; flex-wrap: wrap; gap: 10px 24px; margin: 0; padding: 0; list-style: none; }
+.talk-end button.link { border-width: 0 0 2px; background: none; color: var(--white); font: inherit; cursor: pointer; }
+.talk-end-work h3 { color: var(--red); }
+
+@media (max-width: 760px) {
+  .talk { --stage-top: 48px; }   /* the rail is the bar at the top on phones (main.css) */
+  .talk-stage, .talk-overview { top: var(--stage-top); }
+  .talk-fullscreen { display: none; }   /* no full screen API on iPhone; the bar must fit a phone */
+  .talk-overview { padding-top: 64px; }
+  .talk-overview-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .talk-end-body { align-self: start; padding-top: 72px; }
+  .talk-end-body h2 { margin-bottom: 40px; }
+  .talk-end-grid { grid-template-columns: 1fr; gap: 0; }
+  .talk-end-grid > div { padding: 26px 0 30px; border-bottom: 1px solid var(--rule); }
+}
+
+/* Phones and reduced motion (from the website's main.css): the rail becomes a bar at the top */
+@media (max-width: 760px) {
+  :root { --rail: 0px; --pad: 16px; }
+  body { font-size: 16px; }
+  .rail { right: 0; bottom: auto; flex-direction: row; gap: 14px; width: auto; height: 48px; padding: 0 16px; }
+  .rail-logo, .rail-logo img { width: 26px; height: 26px; }
+  .rail-verb { gap: 8px; font-size: 12px; writing-mode: horizontal-tb; text-orientation: mixed; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rail-logo, .rail-word { transition: none; }
+}

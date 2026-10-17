@@ -1,0 +1,168 @@
+/* Keystone slide theme. Every slide is a 1280×720 document; the presenter scales it.
+   Geometry comes from the Keynote master (720×405 pt) × 1.7778. */
+
+@import url("/public/tokens.css");        /* colours and type, shared with the website */
+@import url("/public/fonts/fonts.css");   /* Poppins, shared with the website */
+
+
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body.sa-slide {
+  position: relative; width: 1280px; height: 720px; overflow: hidden;
+  background: var(--ink); color: var(--white);
+  font-family: var(--body); -webkit-font-smoothing: antialiased;
+}
+img, video { display: block; }
+
+/* Header (style C « Rail »): a red rail down the left edge carries the logo and the chapter,
+   stacked upright and read top to bottom. The slide's topic is the page title (.sa-title). */
+.sa-head { position: absolute; left: 0; top: 0; bottom: 0; width: 46px; z-index: 5; display: flex; flex-direction: column; align-items: center;
+  gap: 20px; padding-top: 22px; background: var(--red); }
+.sa-head .sa-logo { width: 28px; height: 28px; margin: 0; }
+.sa-band { margin: 0; writing-mode: vertical-rl; text-orientation: upright; font: 600 14px/1 var(--mono); letter-spacing: .14em;
+  color: var(--white); white-space: nowrap; text-transform: uppercase; }
+.sa-title { position: absolute; left: 73px; right: 73px; top: 62px; margin: 0; font: 800 42px/1.1 var(--display); letter-spacing: -.015em;
+  color: var(--white); text-wrap: balance; }
+
+/* Text scale: lead 26 · body & lists 24 · captions 14 mono */
+.sa-lead { position: absolute; left: 73px; right: 73px; top: 150px; margin: 0; font-size: 26px; line-height: 1.4; }
+.sa-lead b { font-weight: 600; } .sa-lead span { color: var(--red); font-weight: 600; }
+
+/* Closing line, same place on every slide */
+.sa-takeaway { position: absolute; left: 73px; right: 73px; bottom: 56px; margin: 0; padding-top: 22px; border-top: 1px solid var(--rule);
+  font: 600 28px/1.25 var(--display); color: var(--white); }
+.sa-takeaway span { color: var(--red); }
+
+/* Chapter number on chapter title slides */
+.sa-section-num { position: absolute; left: 55px; top: 300px; width: 718px; margin: 0; text-align: center; font: 500 22px/1 var(--mono); letter-spacing: .3em; color: var(--white); }
+
+/* Giant monogram bleeding off the right edge */
+.sa-monogram { position: absolute; left: 644px; top: -28px; width: 793px; height: 793px; pointer-events: none; }
+.sa-monogram.is-faint { opacity: .1; }
+
+/* Intro slides: text column on the left, a square visual on the right (photo or brand block), same place on every slide */
+.sa-intro-lead { right: auto; width: 720px; }
+.sa-intro-label { position: absolute; left: 73px; top: 262px; display: flex; align-items: center; gap: 12px; margin: 0; font: 500 12px/1 var(--mono); color: var(--gray); text-transform: uppercase; letter-spacing: .12em; }
+.sa-intro-label::before { content: ""; width: 12px; height: 12px; background: var(--red); }
+.sa-intro-list { position: absolute; left: 73px; top: 296px; width: 720px; }
+.sa-intro-visual { position: absolute; left: 860px; top: 150px; width: 347px; height: 347px; margin: 0; object-fit: cover; }
+.sa-intro-visual.is-brand { background: var(--red); display: grid; place-items: center; }
+.sa-intro-visual.is-brand img { width: 62%; height: auto; }
+
+/* Cover slides: red ground, photo at 20 %, monogram */
+body.sa-cover { background: var(--red); }
+.sa-cover-photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .2; transform: scale(1.08); transform-origin: 100% 100%; } /* scaled to push the photo's corner watermark off-frame */
+.sa-wordmark { position: absolute; left: 75px; top: 50px; width: 356px; height: auto; }
+.sa-cover-title { position: absolute; left: 55px; top: 323px; width: 718px; margin: 0; text-align: center; font: 700 48px/1.25 var(--display); }
+
+/* Draft (brief not styled yet) */
+.sa-draft-body { position: absolute; left: 73px; right: 73px; top: 180px; bottom: 150px; display: grid; grid-template-columns: 1fr; gap: 40px; }
+.sa-draft-body.has-ref { grid-template-columns: 1fr 420px; }
+.sa-draft-text { white-space: pre-wrap; font-size: 28px; line-height: 1.4; overflow: hidden; }
+.sa-draft-ref { margin: 0; display: grid; gap: 8px; align-content: start; }
+.sa-draft-ref img { width: 100%; border: 1px solid var(--rule); }
+.sa-draft-ref figcaption { font: 500 14px var(--mono); color: var(--gray); }
+.sa-draft-prompt { position: absolute; left: 73px; right: 73px; bottom: 36px; max-height: 96px; overflow: hidden; padding: 14px 18px;
+  border: 2px dashed var(--red); font: 400 17px/1.4 var(--mono); color: var(--field); white-space: pre-wrap; }
+.sa-draft-prompt b { display: block; color: var(--red); font-weight: 500; margin-bottom: 4px; }
+.sa-draft-flag { position: absolute; right: 36px; top: 28px; font: 500 14px var(--mono); color: var(--red); text-transform: uppercase; letter-spacing: .08em; }
+
+/* Section title slide (cover layout, bigger title) */
+.sa-section-title { top: 356px; font-size: 56px; font-weight: 800; letter-spacing: .01em; }
+.sa-section-title.is-high { top: 176px; }   /* closing slide: content under the title */
+
+/* Bullet list with meaning: .pro = advantage (+ on white), .con = drawback (− on red), plain = red square */
+.sa-list { margin: 0; padding: 0; list-style: none; display: grid; gap: 18px; font-size: 24px; line-height: 1.35; }
+.sa-list li { position: relative; padding-left: 44px; }
+.sa-list li::before { content: ""; position: absolute; left: 0; top: .42em; width: 12px; height: 12px; background: var(--red); }
+.sa-list li.pro::before, .sa-list li.con::before { top: .12em; width: 26px; height: 26px; font: 700 20px/26px var(--display); text-align: center; }
+.sa-list li.pro::before { content: "+"; background: var(--white); color: var(--ink); }
+.sa-list li.con::before { content: "−"; background: var(--red); color: var(--white); }
+.sa-list em { font-style: normal; color: var(--gray); }
+/* A list placed in the content area: top 170 under the title, 262 under a lead (set the width on the slide if needed) */
+.sa-list.is-placed { position: absolute; left: 73px; right: 73px; top: 170px; }
+.sa-lead ~ .sa-list.is-placed { top: 262px; }
+
+/* Section title subtitle (e.g. demo slides) */
+.sa-section-sub { position: absolute; left: 55px; top: 432px; width: 718px; margin: 0; text-align: center; font: 300 30px/1.2 var(--display); color: var(--white); }
+
+/* ---- Content pieces shared by every deck ---- */
+
+/* Mono caps label: eyebrows, axis and frame labels. .is-marked: a red square before it. */
+.sa-label { margin: 0; font: 500 12px/1.35 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--gray); }
+.sa-label.is-marked { display: inline-flex; align-items: center; gap: 12px; }
+.sa-label.is-marked::before { content: ""; flex: none; width: 12px; height: 12px; background: var(--red); }
+.sa-label b { font-weight: 500; color: var(--white); }
+
+/* Heading inside the content area (column, card, figure row): 26, or 22 in small cards */
+.sa-heading { margin: 0; font: 700 26px/1.15 var(--display); color: var(--white); }
+.sa-heading.is-small { font-size: 22px; }
+.sa-heading em { font-style: normal; font-weight: 400; color: var(--gray); }
+
+/* Figure caption: mono 14, grey; <b> for the value */
+.sa-caption { margin: 0; font: 500 14px/1.35 var(--mono); color: var(--gray); }
+.sa-caption b { font-weight: 500; color: var(--white); }
+
+/* Card: raised panel with a 4px top bar (white; .is-key red = the one that matters). Inside, in this order:
+   .sa-label (eyebrow), .sa-heading or .sa-stat, then <p> text or a .sa-list. Position it on the slide. */
+.sa-card { padding: 18px 22px 20px; background: var(--ink-2); border-top: 4px solid var(--white); display: grid; align-content: start; gap: 8px; }
+.sa-card.is-key { border-top-color: var(--red); }
+.sa-card > p:not([class]) { margin: 0; font-size: 18px; line-height: 1.35; color: var(--field); }
+.sa-card > p:not([class]) b { font-weight: 600; color: var(--white); }
+.sa-card .sa-list { font-size: 20px; gap: 12px; }
+.sa-card .sa-list li { padding-left: 30px; }
+.sa-card .sa-list li.pro, .sa-card .sa-list li.con { padding-left: 40px; }
+.sa-card > .sa-note { margin-top: 6px; padding-top: 12px; border-top: 1px solid var(--rule); font: 600 18px/1.35 var(--display); color: var(--white); }
+
+/* Big value: Poppins 34 (.is-large 40), tabular numbers. <span> or .is-key in red, <small> for the unit. */
+.sa-stat { margin: 0; font: 700 34px/1.1 var(--display); color: var(--white); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.sa-stat.is-large { font-size: 40px; }
+.sa-stat.is-key, .sa-stat span { color: var(--red); }
+.sa-stat small { margin-left: 8px; font: 500 15px/1 var(--mono); color: var(--gray); }
+
+/* Pros and cons in two columns: <div class="sa-procon"><section><h3><b>+</b> Avantages</h3><ul class="sa-list">…li.pro</ul></section>
+   <section><h3><b>−</b> Inconvénients</h3>…li.con</section></div>. Top 160; move it down under a lead. */
+.sa-procon { position: absolute; left: 73px; right: 73px; top: 160px; display: grid; grid-template-columns: 1fr 1fr; gap: 56px; }
+.sa-procon h3 { margin: 0 0 24px; padding-bottom: 14px; border-bottom: 1px solid var(--rule); display: flex; align-items: center; gap: 14px;
+  font: 700 30px/1 var(--display); }
+.sa-procon h3 b { width: 36px; height: 36px; display: grid; place-items: center; font-weight: 700; background: var(--white); color: var(--ink); }
+.sa-procon section + section h3 b { background: var(--red); color: var(--white); }
+
+/* Source of a figure: one mono line at the bottom of the content area (links allowed) */
+.sa-source { position: absolute; left: 73px; right: 73px; top: 668px; margin: 0; font: 500 12px/1 var(--mono); letter-spacing: .06em;
+  color: var(--gray); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sa-source a { color: inherit; text-decoration: none; }
+.sa-source a:hover { color: var(--red); text-decoration: underline; }
+
+/* Agenda: <ol class="sa-agenda"><li><span>01</span><div><h3>Chapitre <em>(précision)</em></h3><p>contenu</p></div></li></ol> */
+.sa-agenda { position: absolute; left: 73px; right: 73px; top: 150px; margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--rule); }
+.sa-agenda li { display: grid; grid-template-columns: 74px 1fr; align-items: baseline; min-height: 92px; padding: 20px 0 18px; border-bottom: 1px solid var(--rule); }
+.sa-agenda li > span { font: 500 22px/1 var(--mono); letter-spacing: .1em; color: var(--red); }
+.sa-agenda h3 { margin: 0; font: 600 26px/1.15 var(--display); }
+.sa-agenda h3 em { font-style: normal; font-weight: 400; color: var(--gray); }
+.sa-agenda p { margin: 8px 0 0; font-size: 17px; line-height: 1.35; color: var(--field); }
+
+/* Sources slide: two columns of numbered groups (chapter number in red) with linked references */
+.sa-sources { position: absolute; left: 73px; right: 73px; top: 150px; display: grid; grid-template-columns: 1fr 1fr; gap: 0 56px; }
+.sa-sources > div { display: flex; flex-direction: column; gap: 28px; }
+.sa-sources h3 { display: flex; align-items: center; gap: 12px; margin: 0 0 16px; padding-bottom: 10px; border-bottom: 1px solid var(--rule);
+  font: 500 12px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--gray); }
+.sa-sources h3 b { font-weight: 500; color: var(--red); }
+.sa-sources ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 14px; }
+.sa-sources li a { display: block; color: inherit; text-decoration: none; }
+.sa-sources li strong { display: block; font: 600 20px/1.25 var(--display); color: var(--white); }
+.sa-sources li strong em { font-style: normal; font-weight: 400; color: var(--gray); }
+.sa-sources li span { display: block; margin-top: 3px; font-size: 16px; line-height: 1.3; color: var(--field); }
+.sa-sources li code { display: block; margin-top: 4px; font: 400 14px/1.3 var(--mono); color: var(--gray); white-space: nowrap; }
+.sa-sources li a:hover code { color: var(--red); text-decoration: underline; }
+
+/* Closing slide (cover ground, .sa-section-title.is-high "MERCI !"): a recap under a label, or a QR code */
+.sa-closing { position: absolute; left: 135px; top: 318px; width: 560px; }
+.sa-closing > p { margin: 0 0 18px; font: 500 12px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--white); opacity: .8; }
+.sa-closing ul { margin: 0; padding: 22px 0 0; list-style: none; display: grid; gap: 14px; border-top: 1px solid var(--white); }
+.sa-closing li { position: relative; padding-left: 30px; font: 500 21px/1.3 var(--display); color: var(--white); }
+.sa-closing li::before { content: ""; position: absolute; left: 0; top: .42em; width: 12px; height: 12px; background: var(--white); }
+.sa-qr { position: absolute; left: 309px; top: 270px; width: 210px; height: 210px; padding: 14px; background: var(--white); }
+.sa-qr img { width: 100%; height: 100%; image-rendering: pixelated; }
+.sa-qr ~ .sa-section-sub { top: 505px; }
+.sa-section-sub small { display: block; margin-top: 6px; font-size: 22px; opacity: .85; }

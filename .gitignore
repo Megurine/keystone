@@ -1,0 +1,12 @@
+.DS_Store
+node_modules/
+__pycache__/
+.trash/
+screenshots/
+feedback/
+
+# Your own decks, brand and settings: a space of your own (often a git repository cloned here)
+decks/
+
+# Clawd animations for the presenter (fan-made, not part of Keystone)
+public/assets/clawd/

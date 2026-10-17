@@ -1,0 +1,16 @@
+{
+  "id": "stat",
+  "kind": "component",
+  "use": "A big value with its unit",
+  "include": [],
+  "classes": {
+    "sa-stat": "p, 34px",
+    "is-large": "40px",
+    "is-key": "red",
+    "small": "unit"
+  },
+  "rules": {
+    "lines": 1
+  },
+  "example": "cards"
+}

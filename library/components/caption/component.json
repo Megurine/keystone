@@ -1,0 +1,14 @@
+{
+  "id": "caption",
+  "kind": "component",
+  "use": "Figure captions and source lines",
+  "include": [],
+  "classes": {
+    "sa-caption": "mono 14 grey, b = value",
+    "sa-source": "mono 12 line at y 668, links allowed"
+  },
+  "rules": {
+    "sourceTop": 668
+  },
+  "example": "cards"
+}
