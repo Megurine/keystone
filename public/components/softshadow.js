@@ -1,3 +1,5 @@
+// Copyright 2026 SASU Sentient Art
+// SPDX-License-Identifier: Apache-2.0
 // HDRI soft shadow on a floor plane: how much of the environment's light reaches each floor point, used as the
 // floor's aoMap (three.js applies aoMap to environment light only: no light is added, blocked HDRI light is removed).
 // Light directions are drawn from the HDR map in proportion to their light (importance sampling); each renders a depth

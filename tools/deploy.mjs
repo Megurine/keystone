@@ -1,3 +1,5 @@
+// Copyright 2026 SASU Sentient Art
+// SPDX-License-Identifier: Apache-2.0
 // Deploy one deck as static files in the website's talk format, into any folder (the website's site/public, or an
 // empty folder for a standalone copy that any static server can host).
 //

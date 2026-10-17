@@ -1,3 +1,5 @@
+// Copyright 2026 SASU Sentient Art
+// SPDX-License-Identifier: Apache-2.0
 // Slide translations: one slide.html (markup, styles, code, in the deck's source language) + slide.<lang>.json (text).
 // Used by server.js (/render/<id>?lang=en) and tools/deploy.mjs, so both build the same page.
 //

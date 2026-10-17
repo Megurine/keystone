@@ -1,3 +1,5 @@
+// Copyright 2026 SASU Sentient Art
+// SPDX-License-Identifier: Apache-2.0
 // Warn when the browser lacks what the talk's 3D views need (talk.json "requires"). The text slides read fine without it.
 const NAMES = { webgl: 'WebGL', webgpu: 'WebGPU' };
 

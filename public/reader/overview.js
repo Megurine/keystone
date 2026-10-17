@@ -1,3 +1,5 @@
+// Copyright 2026 SASU Sentient Art
+// SPDX-License-Identifier: Apache-2.0
 // Overview: every slide as a thumbnail (slides/<id>/thumb-<lang>.webp, made by tools/deploy.mjs), the end card last.
 // Opens from the toolbar or the O key; a click goes to that slide; Escape or O closes it.
 export function initOverview(talk, stage, { base, slides, lang, endLabel }) {

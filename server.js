@@ -1,3 +1,5 @@
+// Copyright 2026 SASU Sentient Art
+// SPDX-License-Identifier: Apache-2.0
 // Keystone: local presentation server. No dependencies: node server.js [deck folder]
 import http from "node:http";
 import net from "node:net";

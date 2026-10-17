@@ -1,3 +1,5 @@
+// Copyright 2026 SASU Sentient Art
+// SPDX-License-Identifier: Apache-2.0
 // Check a deployed talk in headless Chrome, as a visitor sees it: serves <out> at its root, opens
 // /talks/<slug>/ in every language, steps through every slide to the end card with the arrow key, then opens it once at
 // phone size. Prints JS errors and failed requests; writes a screenshot per step into <shots dir>.

@@ -1,3 +1,5 @@
+// Copyright 2026 SASU Sentient Art
+// SPDX-License-Identifier: Apache-2.0
 // Convert the PNG and JPEG images of decks (or any folder) to WebP, in place, and update every reference to them.
 //
 //   node tools/webp.mjs <folder> … [--dry]      e.g. node tools/webp.mjs decks/my-talk library public/assets/brand

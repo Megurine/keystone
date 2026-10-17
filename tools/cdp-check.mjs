@@ -1,3 +1,5 @@
+// Copyright 2026 SASU Sentient Art
+// SPDX-License-Identifier: Apache-2.0
 // Drive the real presenter in headless Chrome over the DevTools protocol (real time, real key presses).
 // Usage: node tools/cdp-check.mjs <slideNumber> "<actions>" <out-prefix>
 //   actions: comma list of  wait:<ms> | key:<ArrowRight|ArrowLeft|...> | shot:<name>

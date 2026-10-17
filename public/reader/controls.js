@@ -1,3 +1,5 @@
+// Copyright 2026 SASU Sentient Art
+// SPDX-License-Identifier: Apache-2.0
 // Everything the reader uses to move: toolbar, keys, swipe, overview, full screen, language link, the #slide address.
 // The toolbar and the close cross fade out when the pointer rests, unless it rests on them.
 const pad = n => String(n).padStart(2, '0');

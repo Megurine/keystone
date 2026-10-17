@@ -1,3 +1,4 @@
+/* Copyright 2026 SASU Sentient Art · SPDX-License-Identifier: Apache-2.0 */
 /* Shared diagram pieces: pipeline nodes, pass lines, image tiles. Absolute positions come from each slide. */
 .dg-node { position: absolute; width: 150px; height: 50px; display: grid; place-items: center; border: 2px solid; border-radius: 10px;
            font: 600 14px/1.1 var(--display); color: var(--white); text-align: center; }

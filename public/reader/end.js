@@ -1,3 +1,5 @@
+// Copyright 2026 SASU Sentient Art
+// SPDX-License-Identifier: Apache-2.0
 // The end card, after the last slide of every talk: share the talk, follow the author, write to them.
 // Same for every talk, in the talk's language (English, or French when the talk is read in French).
 // The follow links and the contact address come from site.json (site.follow: [[name, url]], site.contact,

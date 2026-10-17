@@ -1,3 +1,4 @@
+/* Copyright 2026 SASU Sentient Art · SPDX-License-Identifier: Apache-2.0 */
 /* Poppins, the display face (SIL Open Font License 1.1, see OFL.txt). One file for the deck theme and the published talks (tools/deploy.mjs). */
 @font-face { font-family: "Poppins"; font-weight: 300; font-display: swap; src: url("/public/fonts/poppins-300.woff2") format("woff2"); }
 @font-face { font-family: "Poppins"; font-weight: 400; font-display: swap; src: url("/public/fonts/poppins-400.woff2") format("woff2"); }

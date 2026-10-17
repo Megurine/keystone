@@ -1,3 +1,4 @@
+/* Copyright 2026 SASU Sentient Art · SPDX-License-Identifier: Apache-2.0 */
 /* Keystone design tokens: colours and type. One file for every deck and the published talks
    (tools/deploy.mjs copies it to /css/tokens.css). Use these, never raw colours. */
 

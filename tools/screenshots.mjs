@@ -1,3 +1,5 @@
+// Copyright 2026 SASU Sentient Art
+// SPDX-License-Identifier: Apache-2.0
 // Capture every slide at 1280×720 into screenshots/NN-id.png (resting state = final layout).
 // Usage: npm run shots [-- id1 id2 ...]   (server must be running on PORT, default 4321; shoots the deck it serves)
 import { execFileSync } from "node:child_process";

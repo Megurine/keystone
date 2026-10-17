@@ -1,3 +1,5 @@
+// Copyright 2026 SASU Sentient Art
+// SPDX-License-Identifier: Apache-2.0
 // Headless Chrome over the DevTools protocol, for the tools: WebP encoding (deploy.mjs, webp.mjs) and screenshots.
 //   const chrome = await launchChrome(); const page = await chrome.newPage();
 //   const webp = await encodeWebp(page, pngBuffer, { mime: "image/png", quality: .9 });   // quality 1 = lossless

@@ -1,3 +1,5 @@
+// Copyright 2026 SASU Sentient Art
+// SPDX-License-Identifier: Apache-2.0
 // Keystone feedback language (.ks): one typed statement per line, `Type name(arguments);` (`//` starts a comment).
 // An argument is a "string", a number, an Enum::Value, the name of an earlier statement, or a value `Type(arguments)`.
 // The tables below are the whole language. The presenter, the server, tools/transcribe.py and Claude all write

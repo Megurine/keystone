@@ -1,3 +1,5 @@
+// Copyright 2026 SASU Sentient Art
+// SPDX-License-Identifier: Apache-2.0
 // The page's rail (reader.css .rail, markup in talk.html), in place of each slide's own rail:
 // the current slide's chapter, or "share" on the end card (after site.json's "railPrefix", e.g. "Built to"), with a word swap.
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;

@@ -1,3 +1,5 @@
+// Copyright 2026 SASU Sentient Art
+// SPDX-License-Identifier: Apache-2.0
 // Ultra HDR decoder: JPEG + gain map (ISO 21496-1 metadata, as written by libultrahdr / tools/env.py) → linear HDR.
 // Spec formula at full boost: hdr = (sdr + offsetSdr) · 2^lerp(min, max, gain^(1/gamma)) − offsetHdr, in linear sRGB.
 //

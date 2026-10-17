@@ -1,3 +1,5 @@
+// Copyright 2026 SASU Sentient Art
+// SPDX-License-Identifier: Apache-2.0
 // Compress the geometry of GLB models with meshopt (EXT_meshopt_compression), in place. Textures are kept as they are.
 //
 //   node tools/meshopt.mjs <folder or .glb> …     e.g. node tools/meshopt.mjs decks/my-talk/assets/models

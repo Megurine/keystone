@@ -1,3 +1,5 @@
+// Copyright 2026 SASU Sentient Art
+// SPDX-License-Identifier: Apache-2.0
 // Declarative entrance animations for slides.
 // Mark elements with data-in="<delay ms>" and optionally data-anim="fade|pop|draw|wipe|rise" and data-dur="<ms>".
 // They play on sa:enter and reset on sa:leave; with no presenter (or before entering) everything stays visible.

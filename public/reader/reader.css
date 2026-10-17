@@ -1,3 +1,4 @@
+/* Copyright 2026 SASU Sentient Art · SPDX-License-Identifier: Apache-2.0 */
 /* Keystone reader (talks/<slug>/, public/reader/). Self-contained: the base, rail and components it needs from the
    website's main.css are copied below, so a published talk runs on the website and on any static host.
    The page's rail on the left, then the whole slide, the page around it painted to match (stage.js),

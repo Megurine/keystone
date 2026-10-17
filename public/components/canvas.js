@@ -1,3 +1,5 @@
+// Copyright 2026 SASU Sentient Art
+// SPDX-License-Identifier: Apache-2.0
 // Canvas render resolution for slides. The presenter scales each 1280×720 slide on screen with a CSS transform, so a
 // canvas needs screen pixels, not slide pixels: display.js (loaded by every slide page) gives saPixelRatio() and fires
 // "sa:resize" when it changes. Figures built with stage.js get this already; use these helpers for the others.

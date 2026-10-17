@@ -1,3 +1,5 @@
+// Copyright 2026 SASU Sentient Art
+// SPDX-License-Identifier: Apache-2.0
 // Keystone reader (read-only): reads the talk's talk.json (written by tools/deploy.mjs) and shows its slides.
 // The page is talks/<slug>/index.html, generated from public/reader/talk.html; <main data-talk> gives the folder.
 // Links that belong to the host site (home, talk list, contact, follow) come from site.json next to this file.

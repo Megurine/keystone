@@ -1,3 +1,5 @@
+// Copyright 2026 SASU Sentient Art
+// SPDX-License-Identifier: Apache-2.0
 // A quick check that Keystone runs on this machine (macOS, Windows, Linux): every script parses, each example deck is
 // served and renders (French and English), screenshots work, and a deck publishes. Used by the CI; run it after a change.
 //   node tools/smoke.mjs            exit 1 when something fails; it prints what

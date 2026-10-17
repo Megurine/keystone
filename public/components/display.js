@@ -1,3 +1,5 @@
+// Copyright 2026 SASU Sentient Art
+// SPDX-License-Identifier: Apache-2.0
 // Render resolution for canvases. The presenter and the reader show each 1280×720 slide in an iframe scaled with a CSS
 // transform, so devicePixelRatio alone renders too few pixels on a large screen. Loaded by every slide page.
 //   saPixelRatio() — screen pixels per slide pixel (devicePixelRatio × slide scale, 1 to 3).

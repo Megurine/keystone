@@ -1,3 +1,5 @@
+// Copyright 2026 SASU Sentient Art
+// SPDX-License-Identifier: Apache-2.0
 // The stage: one iframe per slide (a 1280x720 page), the current one shown whole, the page around it painted to match.
 // The page shows its own rail (rail.js) in place of each slide's own rail, so the slide's left 46px are cut off.
 // Only slides near the current one stay loaded, because the 3D slides each hold a WebGL context.

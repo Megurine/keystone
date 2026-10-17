@@ -1,3 +1,5 @@
+// Copyright 2026 SASU Sentient Art
+// SPDX-License-Identifier: Apache-2.0
 // Copy media files of another deck (or of the style library, or of public/assets) into a deck, so the deck holds
 // everything its slides show: a slide must never point at another deck's folder or server.
 //   node tools/asset.mjs <file> [<file> …] <deck folder>

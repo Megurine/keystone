@@ -1,3 +1,5 @@
+// Copyright 2026 SASU Sentient Art
+// SPDX-License-Identifier: Apache-2.0
 // An opaque plane that fills a perspective camera's view, painted with a 2D canvas.
 // Glass (transmission) only refracts opaque objects of the scene, never the page behind the canvas: the ground,
 // a glow or a grid it should bend must be in the scene. MeshBasicMaterial + toneMapped: false keeps the painted

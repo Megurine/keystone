@@ -1,3 +1,5 @@
+// Copyright 2026 SASU Sentient Art
+// SPDX-License-Identifier: Apache-2.0
 // three.js stage for slides: renderer at the slide's real resolution, a preset "look", models, a play loop.
 //
 //   import { THREE, stage, material, applyLook, loadModel, playLoop } from "/public/components/stage.js";

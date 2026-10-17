@@ -1,3 +1,5 @@
+# Copyright 2026 SASU Sentient Art
+# SPDX-License-Identifier: Apache-2.0
 # /// script
 # requires-python = ">=3.10"
 # dependencies = ["imagecodecs>=2024.9", "numpy", "OpenEXR>=3.3"]
