@@ -10,6 +10,7 @@ import { checkRequirements } from './checks.js';
 import { createEnd, endStrings } from './end.js';
 import { initOverview } from './overview.js';
 import { initRail } from './rail.js';
+import { initMenu } from './menu.js';
 
 async function init() {
   const talk = document.querySelector('.talk');
@@ -31,6 +32,7 @@ async function init() {
   const stage = createStage(talk, info.slides.map(id => `${base}slides/${id}/${lang}.html`), end);
   initRail(stage);
   const overview = initOverview(talk, stage, { base, slides: info.slides, lang, endLabel });
+  initMenu(talk, stage, { base, slides: info.slides, lang, title: info.title });
   initControls(talk, stage, overview, { lang, languages: info.languages, endLabel });
   stage.show((Number(location.hash.slice(1)) || 1) - 1);
   stage.element.focus();

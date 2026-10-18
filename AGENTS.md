@@ -126,7 +126,14 @@ Tool (URL `/public/…`):
 - `tools/webp.mjs` — convert a folder's PNG/JPEG images to WebP and update references; `tools/chrome.mjs` — headless Chrome (WebP encoding, screenshots) for the tools.
 - `tools/ks.mjs` — the feedback language (`.ks`): its types, parser and checker; `tools/transcribe.py` — local Whisper, adds the voice to a session (see "Feedback sessions").
 - `tools/deploy.mjs` — publish a deck as static files (see above). `public/reader/` — the read-only talk reader it
-  publishes (`talk.html` page template, `site.json` host links: home, talk list, contact, follow).
+  publishes (`talk.html` page template, `site.json` host links: home, talk list, contact, follow). Its "⋯" menu, top
+  right next to the close cross (`menu.js`), makes downloads in the reader's own browser, nothing stored on the server:
+  "Download PDF" (`print.js`: every slide at rest, one 1280×720 page each, through the browser's print window, "Save as
+  PDF"; the text stays text, canvases and videos become still images) and the current slide as PNG or WebP
+  (`capture.js`: our own DOM → SVG `foreignObject` → canvas capture, no library; WebP only where the browser writes it).
+  A WebGL canvas comes out right when it keeps its drawing buffer (`stage.js` does) or redraws on `sa:resize`.
+  Every text file the deploy copies has `.png` / `.jpg` names rewritten to `.webp`: never write such a token in code
+  (`t.png` became `t.webp`).
 - `library/` — the style library (brand, style, layouts, components); also a deck of example slides.
 
 Deck folder (URL `/deck/…` for its files, `/slides/<id>/…` for slide folders):

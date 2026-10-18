@@ -61,6 +61,11 @@ function followCamera(scene, camera, base, sun, light) {
   if (light) { light.position.set(...sun.dir).applyQuaternion(_q).multiplyScalar(10); light.updateMatrixWorld(); }
 }
 
+// What a figure still loads (environment, models, soft shadow), for tools that wait for the slide at rest: the reader's
+// PDF (public/reader/print.js) waits until window.saPending is empty.
+const pending = window.saPending ||= new Set();
+const track = p => { pending.add(p); const done = () => pending.delete(p); p.then(done, done); return p; };
+
 const touch = matchMedia("(pointer: coarse)").matches;                       // phones, tablets
 const pixelRatio = () => Math.min(touch ? 2 : 3, window.saPixelRatio ? saPixelRatio() : (devicePixelRatio || 1));
 const hdr = {};                                        // decoded environments, shared by the stages of a page
@@ -137,7 +142,7 @@ export function stage(canvas, w, h, { look = "pbr", env = "studio", clear = "#1b
   if (pbr) {
     renderer.toneMapping = THREE.NeutralToneMapping;
     renderer.toneMappingExposure = exposure;
-    ready = environment(renderer, env).then(t => { envMap = t; scenes.forEach(s => (s.environment = t)); draw?.(); });
+    ready = track(environment(renderer, env).then(t => { envMap = t; scenes.forEach(s => (s.environment = t)); draw?.(); }));
   }
   const scene = dress(new THREE.Scene());
 
@@ -174,7 +179,7 @@ export function stage(canvas, w, h, { look = "pbr", env = "studio", clear = "#1b
   // softShadow(floor, camera): built progressively once the environment is ready, then drawn.
   function softShadow(floor, camera) {
     if (!pbr) return Promise.resolve();
-    return ready.then(() => hdr[env]).then(({ width, height, data }) => new Promise(done => {
+    return track(ready.then(() => hdr[env]).then(({ width, height, data }) => new Promise(done => {
       const sh = buildSoftShadow(renderer, scene, floor, { hdr: { width, height, data }, toWorld: envTurn(camera, base) });
       const tick = () => {
         if (!sh.step(16)) return requestAnimationFrame(tick);
@@ -182,7 +187,7 @@ export function stage(canvas, w, h, { look = "pbr", env = "studio", clear = "#1b
         draw?.(); done(sh);
       };
       tick();
-    }));
+    })));
   }
 
   return { renderer, scene, render, softShadow, newScene: () => dress(new THREE.Scene()), look, ready };
@@ -223,7 +228,7 @@ export function applyLook(root, look) {
 const loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder), models = {};
 export function loadModel(url) {
   models[url] ||= loader.loadAsync(url);
-  return models[url].then(g => g.scene.clone(true));
+  return track(models[url].then(g => g.scene.clone(true)));
 }
 
 // Runs frame(t) on every animation frame between sa:enter and sa:leave.

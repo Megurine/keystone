@@ -47,8 +47,38 @@ h2 { margin: 0 0 26px; font: 800 clamp(40px, 5vw, 76px)/1 var(--display); letter
 .talk-bar button:hover, .talk-bar button:focus-visible, .talk-bar a:hover, .talk-bar a:focus-visible { background: var(--red); outline: none; }
 .talk-count { min-width: 8ch; padding: 0 8px; color: var(--gray); text-align: center; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .talk-bar-sep { width: 1px; height: 18px; margin: 0 4px; background: var(--rule); }
-.talk.is-idle .talk-bar, .talk.is-idle .talk-close { opacity: 0; pointer-events: none; }
+.talk.is-idle .talk-bar, .talk.is-idle .talk-close, .talk.is-idle .talk-more { opacity: 0; pointer-events: none; }
 .talk-close { transition: background .2s, opacity .3s; }
+
+/* The "⋯" menu (menu.js), left of the close cross: downloads, made in the reader's browser */
+.talk-more { position: absolute; z-index: 2; top: calc(var(--stage-top) + var(--slide-top, 0px) + 12px); right: calc(var(--slide-right, 0px) + 64px); display: grid; place-items: center; width: 48px; height: 48px;
+  padding: 0; border: 0; background: rgb(27 27 28 / .7); color: var(--white); font: 400 22px/1 var(--body); cursor: pointer; transition: background .2s, opacity .3s; }
+.talk-more:hover, .talk-more:focus-visible, .talk-more[aria-expanded="true"] { background: var(--red); outline: none; }
+.talk:has(.talk-menu:not([hidden])) .talk-more { opacity: 1; pointer-events: auto; }   /* stays while its menu is open */
+.talk-menu { position: absolute; z-index: 5; top: calc(var(--stage-top) + var(--slide-top, 0px) + 64px); right: calc(var(--slide-right, 0px) + 12px); display: flex; flex-direction: column;
+  min-width: 240px; padding: 4px; background: rgb(27 27 28 / .96); border: 1px solid var(--rule); }
+.talk-menu[hidden] { display: none; }
+.talk-menu button { padding: 12px 14px; border: 0; background: none; color: var(--white); font: inherit; letter-spacing: inherit; text-transform: inherit; text-align: left; cursor: pointer; }
+.talk-menu button:hover, .talk-menu button:focus-visible { background: var(--red); outline: none; }
+.talk-menu button:disabled { color: var(--dim); background: none; cursor: default; }
+.talk.is-overview .talk-more { opacity: 0; pointer-events: none; }
+
+/* Download PDF (print.js): the slides load in a sheet under a progress card, then the sheet alone is printed */
+.talk-print { position: fixed; z-index: 40; inset: 0; overflow: hidden; pointer-events: none; }
+.talk-print-frame { position: absolute; top: 0; left: 0; width: 1280px; height: 720px; border: 0; }
+.talk-printing { position: fixed; z-index: 41; inset: 0; display: grid; place-content: center; justify-items: center; gap: 18px; padding: var(--pad); background: var(--ink); color: var(--light); text-align: center; }
+.talk-printing p { margin: 0; }
+.talk-printing .mono { color: var(--white); }
+.talk-printing-hint:empty { display: none; }
+.talk-printing button.link { border-width: 0 0 2px; background: none; color: var(--white); font: inherit; cursor: pointer; }
+.talk-printing button.link:focus-visible { outline: none; border-color: var(--red); }
+@media print {
+  html, body.is-printing { height: auto !important; overflow: visible !important; background: none !important; }
+  body.is-printing > :not(.talk-print) { display: none !important; }
+  body.is-printing .talk-print { position: static; overflow: visible; }
+  body.is-printing .talk-print-frame { position: static; display: block; break-after: page; }
+  body.is-printing .talk-print-frame:last-child { break-after: auto; }
+}
 .talk-warning { position: absolute; z-index: 2; left: 16px; right: 80px; bottom: 72px; max-width: 640px; margin: 0; padding: 14px 18px;
   border-left: 4px solid var(--red); background: rgb(27 27 28 / .92); color: var(--light); font-size: 14px; line-height: 1.5; }
 .talk-warning b { display: block; margin-bottom: 4px; color: var(--white); }

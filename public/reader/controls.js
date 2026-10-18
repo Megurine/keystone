@@ -59,7 +59,8 @@ export function initControls(talk, stage, overview, { lang, languages, endLabel 
     clearTimeout(timer);
     timer = setTimeout(() => { if (!hovered) talk.classList.add('is-idle'); }, 2500);
   }
-  for (const el of [talk.querySelector('.talk-bar'), close]) {
+  for (const el of [talk.querySelector('.talk-bar'), close, talk.querySelector('.talk-more'), talk.querySelector('.talk-menu')]) {
+    if (!el) continue;
     el.addEventListener('pointerenter', () => { hovered++; wake(); });
     el.addEventListener('pointerleave', () => { hovered = Math.max(0, hovered - 1); wake(); });
   }

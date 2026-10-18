@@ -109,6 +109,7 @@ export function createStage(talk, sources, end) {
     count,
     slides: frames.length,
     get index() { return index; },
+    get frame() { return frames[index] || null; },   // the current slide's iframe (null on the end card)
     show,
     step,
     on: (type, fn) => listeners[type].push(fn),   // 'frame' (a slide window loaded), 'change' (new current slide), 'chapter' (null: end card)
