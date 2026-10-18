@@ -7,6 +7,8 @@ an HTML page (1280×720) with its own CSS and JavaScript, so it can hold a live 
 step by step, or a real demo. You write what a slide must say, Claude styles it, and you correct it by drawing and
 talking over your slides.
 
+https://github.com/user-attachments/assets/6dffc607-1461-4b5a-b317-7f58a48e0627
+
 <p align="center">
 <img src="library/layouts/cover/thumb.png" width="32%" alt="Cover slide">
 <img src="library/layouts/list/thumb.png" width="32%" alt="List slide">
