@@ -63,6 +63,13 @@ Server settings, as environment variables:
 | `D` | The feedback language as it is written |
 | `⌘S` | Save the editor |
 
+Touch screens (phone, tablet): swipe left or right, or tap the left or right edge of the slide, to change slide; a tap
+shows the bar, which keeps the presenting buttons only. Full screen: the browser's on iPad; on iPhone (no full screen
+for pages), Share › Add to Home Screen: the deck then opens as a full-screen web app with its name and icon
+(`/manifest.webmanifest`, `/icon.png` = `<deck>/assets/icon.png` 512×512, else `assets/brand/icon.png` of `decks/public/`
+then `public/`). On a phone (touch and a short side under 600 px, or `?phone` in the address) each slide is rendered
+with `<html class="sa-phone">` (`/render/<id>?phone`): a deck's CSS can make its text bigger there, since the slide shows at about half size.
+
 Pages reload by themselves when a file of the deck or of `public/` changes. The presenter keeps only the slides near
 the current one loaded, so decks with many WebGL slides stay within the browser's limits.
 
@@ -167,6 +174,7 @@ Slide fragment conventions:
 - Palette: only the tokens of `public/tokens.css` in CSS (`var(--red)`, never `#ee342c`). Raw colours stay only where CSS variables cannot go (canvas and three.js code, SVG presentation attributes) and for data colours. Display type Poppins (titles), body Helvetica. No other colors unless the feedback asks.
 - Assets: brand images `/public/assets/brand/...`, deck media `/deck/assets/...`; files placed in the slide's own folder can be referenced relatively.
 - Images are WebP (never PNG or JPEG, except `*.uhdr.jpg` environments). New PNG/JPEG files: `node tools/webp.mjs <folder> …` converts them in place (lossless for diagrams and data images such as splat maps and checkers, lossy .9 for renders and photos) and rewrites every reference; `--dry` lists first.
+- Phone: `.sa-phone …` rules adapt a slide for a phone screen (see "Keys of the presenter"); the slide keeps its 1280×720 layout.
 - Slide-local `<style>` and `<script>` are fine. The presenter fires `sa:enter` and `sa:leave` on the slide's `window` and toggles `body.sa-active` (use them to start videos or animations).
 - Slide text is in the deck's language (`lang` in `deck.json`, English by default); technical terms keep their usual English form. Translate copy written in another language (a sketch, a note).
 - Keep the user's wording. Fix nothing in their text unless the feedback asks.

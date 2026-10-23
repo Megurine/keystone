@@ -5,7 +5,7 @@ import http from "node:http";
 import net from "node:net";
 import zlib from "node:zlib";
 import fs from "node:fs/promises";
-import { watch, existsSync, readFileSync, writeFileSync } from "node:fs";
+import { watch, existsSync, readFileSync, writeFileSync, createReadStream } from "node:fs";
 import path from "node:path";
 import os from "node:os";
 import crypto from "node:crypto";
@@ -211,8 +211,16 @@ async function serveFile(req, res, file, base) {
     if (!st.isFile()) throw new Error("not a file");
     const etag = `W/"${st.size.toString(36)}-${Math.round(st.mtimeMs).toString(36)}"`;
     const ext = path.extname(file).toLowerCase();
-    const head = { "content-type": TYPES[ext] || "application/octet-stream", "cache-control": "no-cache", etag, vary: "accept-encoding" };
+    const head = { "content-type": TYPES[ext] || "application/octet-stream", "cache-control": "no-cache", etag, vary: "accept-encoding", "accept-ranges": "bytes" };
     if (req.headers["if-none-match"] === etag) { res.writeHead(304, head); return res.end(); }
+    // Byte ranges: Safari (iPhone, iPad, Mac) plays a video only when the server answers them
+    const r = /^bytes=(\d*)-(\d*)$/.exec(req.headers.range || "");
+    if (r && (r[1] || r[2])) {
+      const start = r[1] ? Number(r[1]) : Math.max(0, st.size - Number(r[2])), end = r[1] && r[2] ? Math.min(Number(r[2]), st.size - 1) : st.size - 1;
+      if (start >= st.size || start > end) { res.writeHead(416, { "content-range": `bytes */${st.size}` }); return res.end(); }
+      res.writeHead(206, { ...head, "content-range": `bytes ${start}-${end}/${st.size}`, "content-length": end - start + 1 });
+      return createReadStream(file, { start, end }).pipe(res);
+    }
     if (GZIP.has(ext) && st.size > 1024 && /\bgzip\b/.test(req.headers["accept-encoding"] || "")) {
       const data = await gzipOnce(file, etag);
       res.writeHead(200, { ...head, "content-encoding": "gzip", "content-length": data.length });
@@ -679,6 +687,19 @@ Get ready: read ${rel(path.join(SLIDES, slide, "slide.html"))} now. Change no fi
         return existsSync(own) ? serveFile(req, res, own, OVERLAY) : serveFile(req, res, path.join(PUBLIC, p.slice(8)), PUBLIC);
       }
       if (p.startsWith("/deck/")) return serveFile(req, res, path.join(DECK_DIR, p.slice(6)), DECK_DIR);
+      // Web app (Add to Home Screen, install): the deck's name, full screen, landscape; its icon is <deck>/assets/icon.png
+      // (512×512), else the brand's (decks/public/assets/brand/icon.png, then public/'s)
+      if (p === "/manifest.webmanifest") {
+        const d = await readJSON(DECK, {}), name = titleIn(d, viewLang(url)) || DECK_NAME;
+        res.writeHead(200, { "content-type": "application/manifest+json; charset=utf-8", "cache-control": "no-cache" });
+        return res.end(JSON.stringify({ name, short_name: name, start_url: "/", scope: "/", display: "fullscreen", orientation: "landscape",
+          background_color: "#000000", theme_color: "#000000", icons: [{ src: "/icon.png", sizes: "512x512", type: "image/png", purpose: "any" }] }));
+      }
+      if (p === "/icon.png") {
+        const own = path.join(DECK_DIR, "assets", "icon.png"), brand = path.join(OVERLAY, "assets", "brand", "icon.png");
+        return existsSync(own) ? serveFile(req, res, own, DECK_DIR) : existsSync(brand) ? serveFile(req, res, brand, OVERLAY)
+          : serveFile(req, res, path.join(PUBLIC, "assets", "brand", "icon.png"), PUBLIC);
+      }
 
       if (p === "/api/events") {
         res.writeHead(200, { "content-type": "text/event-stream", "cache-control": "no-store", connection: "keep-alive" });
@@ -694,7 +715,9 @@ Get ready: read ${rel(path.join(SLIDES, slide, "slide.html"))} now. Change no fi
         const style = (url.searchParams.get("style") || "").replace(/[^a-z0-9-]/g, "");
         // ?before=1: the slide as it was before Claude's changes (the review); a slide Claude did not change: as it is
         const was = url.searchParams.has("before") ? reviewBefore.get(path.join(SLIDES, m[1], "slide.html")) : undefined;
-        const html = await renderSlide(m[1], style, viewLang(url), was);
+        let html = await renderSlide(m[1], style, viewLang(url), was);
+        // ?phone: the presenter runs on a phone; <html class="sa-phone"> lets the slide's CSS adapt (bigger text)
+        if (url.searchParams.has("phone")) html = html.replace("<html ", '<html class="sa-phone" ');
         const fb = url.searchParams.get("feedback");
         return res.end(fb ? html.replace("</body>", await feedbackOverlay(fb, Number(url.searchParams.get("visit")) || 1) + "</body>") : html);
       }
